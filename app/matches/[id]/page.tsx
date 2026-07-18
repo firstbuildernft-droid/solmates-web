@@ -100,6 +100,27 @@ export default function ThreadPage() {
     router.replace("/matches");
   }
 
+  async function unmatch() {
+    if (!meta) return;
+    await createClient().rpc("unmatch", { match: matchId });
+    router.replace("/matches");
+  }
+
+  async function report() {
+    if (!meta) return;
+    const why = window.prompt(
+      `Report ${meta.other_name}? Tell us what's wrong (optional):`
+    );
+    // null means they hit Cancel — do nothing. Empty string is a valid
+    // "report with no reason", so we check for null specifically.
+    if (why === null) return;
+    await createClient().rpc("report_profile", {
+      target: meta.other_id,
+      why: why || null,
+    });
+    router.replace("/matches");
+  }
+
   if (loading || !meta) return null;
 
   return (
@@ -175,30 +196,29 @@ export default function ThreadPage() {
               boxShadow: "0 8px 28px rgba(11,31,18,.14)",
               padding: 6,
               zIndex: 20,
-              width: 210,
+              width: 230,
             }}
           >
-            <button
-              onClick={block}
-              style={{
-                width: "100%",
-                background: "none",
-                border: "none",
-                textAlign: "left",
-                padding: "9px 10px",
-                borderRadius: 8,
-                color: "#dc2626",
-                fontWeight: 800,
-                fontSize: 13.5,
-                fontFamily: font,
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={unmatch} style={menuItem}>
+              Unmatch
+            </button>
+            <div style={menuHint}>
+              Removes the match and deletes this chat for both of you.
+            </div>
+
+            <button onClick={report} style={{ ...menuItem, color: "#dc2626" }}>
+              Report {meta.other_name}
+            </button>
+            <div style={menuHint}>
+              Flags them for review and hides them from you. They&apos;re not
+              told.
+            </div>
+
+            <button onClick={block} style={{ ...menuItem, color: "#dc2626" }}>
               Block {meta.other_name}
             </button>
-            <div style={{ fontSize: 11.5, color: MUTE, padding: "2px 10px 6px", lineHeight: 1.4 }}>
-              They won&apos;t see you again, and you won&apos;t see them.
-              They&apos;re not told.
+            <div style={menuHint}>
+              You&apos;ll never see each other again.
             </div>
           </div>
         )}
@@ -301,3 +321,23 @@ export default function ThreadPage() {
     </div>
   );
 }
+
+const menuItem: React.CSSProperties = {
+  width: "100%",
+  background: "none",
+  border: "none",
+  textAlign: "left",
+  padding: "9px 10px",
+  borderRadius: 8,
+  color: "#0b1f12",
+  fontWeight: 800,
+  fontSize: 13.5,
+  cursor: "pointer",
+};
+
+const menuHint: React.CSSProperties = {
+  fontSize: 11,
+  color: "#6b8377",
+  padding: "0 10px 8px",
+  lineHeight: 1.35,
+};

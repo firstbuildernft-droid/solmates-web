@@ -29,6 +29,15 @@ export default async function AdminPage() {
     (balances ?? []).map((b) => [b.address, b.sol_balance])
   );
 
+  // Open reports, newest first, with both names resolved.
+  const { data: reports } = await admin
+    .from("reports")
+    .select(
+      "id, reason, status, created_at, reporter:reporter_id(display_name), reported:reported_id(display_name, id)"
+    )
+    .eq("status", "open")
+    .order("created_at", { ascending: false });
+
   return (
     <main
       style={{
@@ -145,6 +154,47 @@ export default async function AdminPage() {
                         "—"
                       )}
                     </Td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {/* ---------------- reports ---------------- */}
+      <H2>Reports</H2>
+      <p style={{ color: MUTE, fontSize: 13, maxWidth: 620 }}>
+        Open reports, newest first. The reporter has already stopped seeing
+        this person — this is for you to decide whether to act further.
+      </p>
+
+      {!reports?.length ? (
+        <Empty>No open reports. Good.</Empty>
+      ) : (
+        <div style={{ overflowX: "auto", marginTop: 14 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr>
+                {["Reported", "By", "Reason", "When"].map((h) => (
+                  <Th key={h}>{h}</Th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {reports.map((r) => {
+                const reported = r.reported as unknown as {
+                  display_name: string;
+                  id: string;
+                } | null;
+                const reporter = r.reporter as unknown as {
+                  display_name: string;
+                } | null;
+                return (
+                  <tr key={r.id} style={{ borderTop: "1px solid rgba(11,31,18,.07)" }}>
+                    <Td strong>{reported?.display_name ?? "—"}</Td>
+                    <Td>{reporter?.display_name ?? "—"}</Td>
+                    <Td>{r.reason || <span style={{ color: MUTE }}>no reason given</span>}</Td>
+                    <Td>{new Date(r.created_at).toLocaleDateString()}</Td>
                   </tr>
                 );
               })}

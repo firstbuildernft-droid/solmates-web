@@ -1,0 +1,43 @@
+NOTIFICATIONS + UNMATCH + REPORT
+================================
+
+1. Run the migration: Supabase -> SQL Editor -> paste 0008_social.sql -> Run.
+
+2. Copy files in (adjust path if you extracted elsewhere):
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaustu\social\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
+
+   (Masaustu may show as Masaüstü -- use whatever your Desktop path is.)
+
+3. Push to deploy:
+
+   cd C:\Users\onur1\Documents\solmates-web
+   git add .
+   git commit -m "notifications, unmatch, report"
+   git push
+
+   Vercel redeploys automatically. Watch the Deployments tab go green.
+
+WHAT'S NEW
+----------
+- Red number badge on the Matches tab: new matches + unread messages,
+  updates live.
+- In any chat, the top-right menu now has: Unmatch, Report, Block.
+    Unmatch  -> deletes the chat for BOTH people
+    Report   -> flags for you in /admin AND hides them from the reporter
+    Block    -> same as before
+- /admin has a new "Reports" section listing open reports.
+
+TEST
+----
+- Two accounts, send a message -> the other's Matches tab shows a red 1.
+- Open the chat -> badge clears.
+- Chat menu -> Unmatch -> chat gone for both.
+- Chat menu -> Report -> you land back on matches; check /admin Reports.
+
+Files:
+  0008_social.sql               <- run in Supabase
+  components/BottomNav.tsx       <- REPLACES
+  app/matches/[id]/page.tsx      <- REPLACES
+  app/admin/page.tsx             <- REPLACES
