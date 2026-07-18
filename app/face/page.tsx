@@ -27,9 +27,15 @@ export default function FacePage() {
       if (!user) return router.replace("/login");
 
       const { data } = await supabase.rpc("face_status").maybeSingle();
-      if (data?.verified) setPhase("passed");
-      else if ((data?.attempts_left ?? 2) <= 0) setPhase("locked");
-      else setAttemptsLeft(data?.attempts_left ?? 2);
+      const status = data as {
+        verified: boolean;
+        attempts_24h: number;
+        attempts_left: number;
+        last_reason: string | null;
+      } | null;
+      if (status?.verified) setPhase("passed");
+      else if ((status?.attempts_left ?? 2) <= 0) setPhase("locked");
+      else setAttemptsLeft(status?.attempts_left ?? 2);
       setLoading(false);
     })();
 
