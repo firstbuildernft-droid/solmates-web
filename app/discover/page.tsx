@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Heart, X, Star, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchDeck, swipe, type Candidate } from "@/lib/deck";
+import { refreshLocationIfStale } from "@/lib/location";
 import { publicUrl } from "@/lib/photos";
 import Card from "@/components/Card";
 import Logo from "@/components/Logo";
@@ -38,6 +39,7 @@ export default function DiscoverPage() {
 
       setMeId(user.id);
       try {
+        refreshLocationIfStale(); // silent, updates for next open
         setDeck(await fetchDeck());
       } catch {
         // empty deck renders its own message

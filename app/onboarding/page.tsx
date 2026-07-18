@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { captureLocation } from "@/lib/location";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
 
 // The one screen that turns an auth user into a Solmates profile.
@@ -72,9 +73,26 @@ export default function OnboardingPage() {
       onboarded: true,
     });
 
+    if (error) {
+      setBusy(false);
+      setError(error.message);
+      return;
+    }
+
+    // Location: ask for GPS now that the profile row exists. If they deny
+    // or it fails, fall back to coarse IP location so the deck still
+    // works. Either way we don't block onboarding on it.
+    try {
+      const gotGps = await captureLocation();
+      if (!gotGps) {
+        await fetch("/api/location/ip", { method: "POST" });
+      }
+    } catch {
+      /* location is best-effort — never trap the user on this screen */
+    }
+
     setBusy(false);
-    if (error) setError(error.message);
-    else router.replace("/");
+    router.replace("/");
   }
 
   if (checking) return null;
@@ -143,6 +161,7 @@ export default function OnboardingPage() {
 
         <Label>City</Label>
         <Input value={city} onChange={setCity} placeholder="Istanbul" />
+        <Hint>After this we'll ask to use your location, so we can show people nearby. You can say no.</Hint>
 
         {error && (
           <div

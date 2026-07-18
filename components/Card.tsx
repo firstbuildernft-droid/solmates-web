@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  MapPin,
   ShieldCheck,
   Wallet,
   Ruler,
@@ -114,8 +115,15 @@ export default function Card({
           )}
         </div>
 
-        {p.city && (
-          <div style={{ fontSize: 12.5, opacity: 0.85, marginBottom: 10 }}>{p.city}</div>
+        {(p.city || p.distance_km != null) && (
+          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12.5, opacity: 0.85, marginBottom: 10 }}>
+            {p.distance_km != null && <MapPin size={12.5} />}
+            {p.distance_km != null
+              ? p.distance_km < 1
+                ? "Less than 1 km away"
+                : `${p.distance_km} km away`
+              : p.city}
+          </div>
         )}
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>

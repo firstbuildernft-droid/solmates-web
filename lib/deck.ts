@@ -15,6 +15,7 @@ export type Candidate = {
   wallet_address: string | null;
   wallet_verified: boolean;
   sol_balance: number | null;
+  distance_km: number | null;
   photos: string[];
   trades: string[];
 };

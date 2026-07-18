@@ -1,39 +1,53 @@
-SETTINGS TAB
-============
+LOCATION & DISTANCE
+===================
 
-New Settings screen (gear icon, top-right of Profile) with: pause profile,
-blocked users + unblock, distance unit, notification toggles, language
-(English; more later), terms/privacy links, sign out, and DELETE ACCOUNT
-(App Store requirement).
+Real location: asks for GPS in onboarding, falls back to rough IP location
+if denied, and shows "3 km away" on cards. Raw coordinates are fuzzed and
+NEVER sent to the app -- only a rounded distance. This is how Tinder
+actually does it.
 
-1. Run migration: Supabase -> SQL Editor -> paste 0009_settings.sql -> Run.
+1. Run migration: Supabase -> SQL Editor -> paste 0010_location.sql -> Run.
 
 2. Copy files in:
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\settings\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\location\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
 
 3. Push:
 
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "settings tab"
+   git commit -m "location and distance"
    git push
 
 FILES
-  0009_settings.sql                     <- run in Supabase
-  app/settings/page.tsx                 <- NEW
-  app/api/account/delete/route.ts       <- NEW
-  app/profile/page.tsx                  <- REPLACES (adds gear icon)
-  components/BottomNav.tsx              <- REPLACES (hides nav on settings)
+  0010_location.sql                    <- run in Supabase
+  lib/location.ts                      <- NEW (GPS capture, fuzz, refresh)
+  lib/deck.ts                          <- REPLACES (distance in type)
+  app/onboarding/page.tsx              <- REPLACES (asks for location)
+  app/discover/page.tsx                <- REPLACES (refreshes location)
+  app/api/location/ip/route.ts         <- NEW (IP fallback)
+  components/Card.tsx                  <- REPLACES (shows "3 km away")
+
+HOW IT WORKS
+- Onboarding: after saving the profile, the browser asks "allow location?"
+  Allow  -> real GPS, fuzzed ~500m + rounded, stored server-side.
+  Deny   -> falls back to coarse IP location (city-level) so the deck
+            still works; card shows city instead of a distance.
+- Cards show "3 km away" / "Less than 1 km away", nearest-first.
+- Location refreshes silently at most every 6h when you open the deck.
+- The real coordinates never leave the server. Only rounded distance does.
 
 TEST
-- Profile tab -> gear icon (top right) -> Settings.
-- Toggle "Pause my profile" -> you vanish from the deck (other account
-  won't see you). Toggle off -> you're back.
-- Block someone (from a chat), then Settings -> Blocked users -> Unblock.
-- Delete account -> confirm -> account and all data gone, back to login.
-  (Test this on a THROWAWAY account, not your main one -- it's permanent.)
+- Fresh account -> onboard -> browser asks for location -> Allow.
+- On another account nearby (same city), the card shows a km distance.
+- Deny the prompt on a test account -> no distance, still see people.
 
-NOTE: Language is English-only for now; the switch is there so adding
-Turkish later is just data, not a rebuild.
+IMPORTANT: browser location ONLY works on https or localhost. Your Vercel
+site is https, so it works there. On localhost it also works. If you ever
+open the site by raw IP address, the prompt won't appear -- that's a
+browser rule, not a bug.
+
+NOTE ON IP FALLBACK: the x-vercel-ip-* headers only exist on Vercel, not
+on localhost. So IP fallback does nothing locally -- test that part on the
+deployed site.
