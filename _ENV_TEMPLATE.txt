@@ -1,0 +1,29 @@
+Make a NEW file in solmates-web called   .env.local   (yes, starting with a dot)
+and paste this in, then fill in the blanks.
+
+Do NOT keep this file itself in the project — it's just the template.
+
+------------------------------------------------------------------
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+SOLANA_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_DEPOSIT_ADDRESS=HyKLk4Wtr2opaDHpep8VcLhZh8jDug4aeq5hVt1rNYF7
+NEXT_PUBLIC_VERIFY_MIN_SOL=0.1
+VERIFY_MIN_SOL=0.1
+ADMIN_EMAILS=
+
+------------------------------------------------------------------
+
+First three   -> Supabase dashboard -> Project Settings -> API
+ADMIN_EMAILS  -> the email you sign up with
+
+No quotes. No spaces around the = sign.
+
+SUPABASE_SERVICE_ROLE_KEY has no NEXT_PUBLIC_ prefix. That's deliberate --
+it's what keeps it out of the browser. It ignores every security rule in
+your database, so it must never reach the frontend.
+
+SOLANA_RPC_URL points at devnet (the free test network) for now. Swap it
+for your Helius URL when you're ready to test with real SOL.
