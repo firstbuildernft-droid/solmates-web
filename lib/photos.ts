@@ -34,36 +34,40 @@ export function publicUrl(storagePath: string) {
     .publicUrl;
 }
 
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result as string);
+    r.onerror = () => reject(new Error("Couldn't read the image."));
+    r.readAsDataURL(blob);
+  });
+}
+
 export async function uploadPhoto(userId: string, file: File, position: number) {
   if (!file.type.startsWith("image/")) {
     throw new Error("That's not an image.");
   }
 
-  const supabase = createClient();
+  // Shrink in the browser (fast, saves bandwidth), then hand the bytes to
+  // the server, which moderates BEFORE anything is stored. userId isn't
+  // trusted from here — the route uses the signed-in session — but we keep
+  // the arg so callers don't change.
   const blob = await shrink(file);
+  const dataUrl = await blobToDataUrl(blob);
 
-  // {user_id}/{random}.jpg — the folder name is what the storage policy
-  // checks, so this path shape is load-bearing, not cosmetic.
-  const path = `${userId}/${crypto.randomUUID()}.jpg`;
+  const res = await fetch("/api/photos/upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: dataUrl, position }),
+  });
 
-  const { error: upErr } = await supabase.storage
-    .from("photos")
-    .upload(path, blob, { contentType: "image/jpeg" });
-  if (upErr) throw upErr;
-
-  const { data, error } = await supabase
-    .from("photos")
-    .insert({ user_id: userId, storage_path: path, position })
-    .select()
-    .single();
-
-  // If the DB row fails, don't leave the file orphaned in the bucket.
-  if (error) {
-    await supabase.storage.from("photos").remove([path]);
-    throw error;
+  const json = await res.json();
+  if (!res.ok) {
+    // The route returns a friendly message for rejected images; surface it.
+    throw new Error(json.message || json.error || "Upload failed.");
   }
 
-  return data;
+  return json.photo;
 }
 
 export async function deletePhoto(id: string, storagePath: string) {

@@ -1,43 +1,48 @@
-NOTIFICATIONS + UNMATCH + REPORT
-================================
+IMAGE MODERATION
+================
 
-1. Run the migration: Supabase -> SQL Editor -> paste 0008_social.sql -> Run.
+Blocks harmful photos (nudity, gore, violence, weapons, hate symbols,
+hard drugs) on upload, BEFORE they're stored. Allows normal dating photos
+including swimwear / shirtless / gym pics.
 
-2. Copy files in (adjust path if you extracted elsewhere):
+NO migration this time. No new env vars -- uses the AWS keys you already
+have.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaustu\social\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+1. Copy files in (adjust path if needed):
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\moderation\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
 
-   (Masaustu may show as Masaüstü -- use whatever your Desktop path is.)
-
-3. Push to deploy:
+2. Push to deploy:
 
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "notifications, unmatch, report"
+   git commit -m "image moderation"
    git push
 
-   Vercel redeploys automatically. Watch the Deployments tab go green.
+   Watch Vercel go green.
 
-WHAT'S NEW
-----------
-- Red number badge on the Matches tab: new matches + unread messages,
-  updates live.
-- In any chat, the top-right menu now has: Unmatch, Report, Block.
-    Unmatch  -> deletes the chat for BOTH people
-    Report   -> flags for you in /admin AND hides them from the reporter
-    Block    -> same as before
-- /admin has a new "Reports" section listing open reports.
+FILES
+   lib/moderation.ts                    <- NEW (the Rekognition check)
+   lib/photos.ts                        <- REPLACES (uploads via server now)
+   app/api/photos/upload/route.ts       <- NEW (moderate-then-store)
+
+HOW IT WORKS
+- Browser shrinks the photo, sends it to the server.
+- Server runs Rekognition DetectModerationLabels.
+- Harmful -> rejected, user sees "That photo can't be used here",
+  nothing is stored.
+- Clean -> uploaded and saved as before.
+- If Rekognition is ever DOWN, uploads are allowed through (fail-open) so
+  an outage doesn't block onboarding. Logged in Vercel.
 
 TEST
-----
-- Two accounts, send a message -> the other's Matches tab shows a red 1.
-- Open the chat -> badge clears.
-- Chat menu -> Unmatch -> chat gone for both.
-- Chat menu -> Report -> you land back on matches; check /admin Reports.
+- Normal selfie / beach photo -> uploads fine.
+- To test a block without anything nasty: Google an image labelled as
+  "graphic violence" news photo, or any obvious weapon-brandishing image,
+  and try to upload it -> should be rejected. (You don't need to test with
+  anything truly disturbing -- a photo of a handgun pointed at camera
+  trips "Weapons".)
 
-Files:
-  0008_social.sql               <- run in Supabase
-  components/BottomNav.tsx       <- REPLACES
-  app/matches/[id]/page.tsx      <- REPLACES
-  app/admin/page.tsx             <- REPLACES
+COST: $0 for your first 5,000 uploads/month (free tier, 12 months), then
+about $1 per 1,000 photos. Same Rekognition you already use.
