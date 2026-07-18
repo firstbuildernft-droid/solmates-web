@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useLongPress, ActionSheet } from "@/components/LongPress";
 import { fetchMatches, type MatchRow } from "@/lib/chat";
 import { publicUrl } from "@/lib/photos";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
@@ -13,6 +14,7 @@ export default function MatchesPage() {
   const [rows, setRows] = useState<MatchRow[]>([]);
   const [meId, setMeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sheetFor, setSheetFor] = useState<MatchRow | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -30,6 +32,22 @@ export default function MatchesPage() {
       setLoading(false);
     })();
   }, [router]);
+
+  async function unmatch(m: MatchRow) {
+    await createClient().rpc("unmatch", { match: m.match_id });
+    setRows((rs) => rs.filter((r) => r.match_id !== m.match_id));
+  }
+  async function block(m: MatchRow) {
+    const { blockUser } = await import("@/lib/chat");
+    if (meId) await blockUser(meId, m.other_id);
+    setRows((rs) => rs.filter((r) => r.match_id !== m.match_id));
+  }
+  async function report(m: MatchRow) {
+    const why = window.prompt(`Report ${m.other_name}? What's wrong (optional):`);
+    if (why === null) return;
+    await createClient().rpc("report_profile", { target: m.other_id, why: why || null });
+    setRows((rs) => rs.filter((r) => r.match_id !== m.match_id));
+  }
 
   if (loading) return null;
 
@@ -136,94 +154,130 @@ export default function MatchesPage() {
         <>
           <SectionLabel>Messages</SectionLabel>
           {talking.map((r) => (
-            <button
+            <MessageRow
               key={r.match_id}
-              onClick={() => router.push(`/matches/${r.match_id}`)}
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "11px 18px",
-                border: "none",
-                background: "none",
-                cursor: "pointer",
-                textAlign: "left",
-              }}
-            >
-              <div
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: "50%",
-                  flexShrink: 0,
-                  background: r.other_photo
-                    ? `center / cover no-repeat url(${publicUrl(r.other_photo)})`
-                    : "#e8efe9",
-                }}
-              />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <span style={{ fontWeight: 800, fontSize: 15, color: INK }}>
-                    {r.other_name}
-                  </span>
-                  {r.other_face_verified && (
-                    <ShieldCheck size={14} color={GREEN} strokeWidth={2.8} />
-                  )}
-                  {r.other_wallet_ok && r.other_sol != null && (
-                    <span
-                      style={{
-                        fontSize: 10.5,
-                        fontWeight: 900,
-                        color: GREEN_DK,
-                        background: "rgba(34,197,94,.12)",
-                        borderRadius: 999,
-                        padding: "1.5px 6px",
-                      }}
-                    >
-                      {Number(r.other_sol).toFixed(1)} SOL
-                    </span>
-                  )}
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: r.unread > 0 ? INK : MUTE,
-                    fontWeight: r.unread > 0 ? 700 : 400,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    marginTop: 2,
-                  }}
-                >
-                  {r.last_sender === meId && "You: "}
-                  {r.last_message}
-                </div>
-              </div>
-              {r.unread > 0 && (
-                <span
-                  style={{
-                    background: GREEN,
-                    color: "#fff",
-                    fontSize: 11,
-                    fontWeight: 900,
-                    minWidth: 20,
-                    height: 20,
-                    borderRadius: 999,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "0 6px",
-                  }}
-                >
-                  {r.unread}
-                </span>
-              )}
-            </button>
+              r={r}
+              meId={meId}
+              onOpen={() => router.push(`/matches/${r.match_id}`)}
+              onLong={() => setSheetFor(r)}
+            />
           ))}
         </>
       )}
+      {sheetFor && (
+        <ActionSheet
+          title={sheetFor.other_name}
+          onClose={() => setSheetFor(null)}
+          actions={[
+            { label: "Unmatch", danger: true, onClick: () => unmatch(sheetFor) },
+            { label: "Report", danger: true, onClick: () => report(sheetFor) },
+            { label: "Block", danger: true, onClick: () => block(sheetFor) },
+          ]}
+        />
+      )}
     </div>
+  );
+}
+
+function MessageRow({
+  r,
+  meId,
+  onOpen,
+  onLong,
+}: {
+  r: MatchRow;
+  meId: string | null;
+  onOpen: () => void;
+  onLong: () => void;
+}) {
+  const lp = useLongPress(onLong);
+  return (
+    <button
+      {...lp.handlers}
+      onClick={() => {
+        if (!lp.didFire()) onOpen();
+      }}
+      style={{
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "11px 18px",
+        border: "none",
+        background: "none",
+        cursor: "pointer",
+        textAlign: "left",
+      }}
+    >
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          flexShrink: 0,
+          background: r.other_photo
+            ? `center / cover no-repeat url(${publicUrl(r.other_photo)})`
+            : "#e8efe9",
+        }}
+      />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ fontWeight: 800, fontSize: 15, color: INK }}>
+            {r.other_name}
+          </span>
+          {r.other_face_verified && (
+            <ShieldCheck size={14} color={GREEN} strokeWidth={2.8} />
+          )}
+          {r.other_wallet_ok && r.other_sol != null && (
+            <span
+              style={{
+                fontSize: 10.5,
+                fontWeight: 900,
+                color: GREEN_DK,
+                background: "rgba(34,197,94,.12)",
+                borderRadius: 999,
+                padding: "1.5px 6px",
+              }}
+            >
+              {Number(r.other_sol).toFixed(1)} SOL
+            </span>
+          )}
+        </div>
+        <div
+          style={{
+            fontSize: 13,
+            color: r.unread > 0 ? INK : MUTE,
+            fontWeight: r.unread > 0 ? 700 : 400,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            marginTop: 2,
+          }}
+        >
+          {r.last_sender === meId && "You: "}
+          {r.last_message}
+        </div>
+      </div>
+      {r.unread > 0 && (
+        <span
+          style={{
+            background: GREEN,
+            color: "#fff",
+            fontSize: 11,
+            fontWeight: 900,
+            minWidth: 20,
+            height: 20,
+            borderRadius: 999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0 6px",
+          }}
+        >
+          {r.unread}
+        </span>
+      )}
+    </button>
   );
 }
 

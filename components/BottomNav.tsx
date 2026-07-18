@@ -86,6 +86,7 @@ export default function BottomNav() {
         return (
           <button
             key={href}
+            data-tap
             onClick={() => router.push(href)}
             style={{
               flex: 1,

@@ -213,6 +213,7 @@ export default function DiscoverPage() {
             You and {matched.display_name} liked each other
           </div>
           <div
+            data-modal
             style={{
               width: 120,
               height: 120,

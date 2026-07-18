@@ -245,6 +245,7 @@ export default function ThreadPage() {
           return (
             <div
               key={m.id}
+              data-msg
               style={{
                 display: "flex",
                 justifyContent: mine ? "flex-end" : "flex-start",
