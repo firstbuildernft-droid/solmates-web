@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Ruler, Dumbbell, Wine, Cigarette, TrendingUp, X, ShieldCheck } from "lucide-react";
+import { Ruler, Dumbbell, Wine, Cigarette, TrendingUp, X, ShieldCheck, Settings } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
@@ -122,17 +122,14 @@ export default function ProfilePage() {
       }}
     >
       <div style={{ width: "100%", maxWidth: 420 }}>
-        <h1
-          style={{
-            fontWeight: 900,
-            fontSize: 26,
-            color: INK,
-            letterSpacing: -0.5,
-            margin: "0 0 22px",
-          }}
-        >
-          My profile
-        </h1>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 0 22px" }}>
+          <h1 style={{ fontWeight: 900, fontSize: 26, color: INK, letterSpacing: -0.5, margin: 0 }}>
+            My profile
+          </h1>
+          <Link href="/settings" aria-label="Settings" style={{ display: "flex", color: MUTE, padding: 4 }}>
+            <Settings size={23} />
+          </Link>
+        </div>
 
         {!faceVerified && (
           <Link

@@ -1,0 +1,39 @@
+SETTINGS TAB
+============
+
+New Settings screen (gear icon, top-right of Profile) with: pause profile,
+blocked users + unblock, distance unit, notification toggles, language
+(English; more later), terms/privacy links, sign out, and DELETE ACCOUNT
+(App Store requirement).
+
+1. Run migration: Supabase -> SQL Editor -> paste 0009_settings.sql -> Run.
+
+2. Copy files in:
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\settings\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
+
+3. Push:
+
+   cd C:\Users\onur1\Documents\solmates-web
+   git add .
+   git commit -m "settings tab"
+   git push
+
+FILES
+  0009_settings.sql                     <- run in Supabase
+  app/settings/page.tsx                 <- NEW
+  app/api/account/delete/route.ts       <- NEW
+  app/profile/page.tsx                  <- REPLACES (adds gear icon)
+  components/BottomNav.tsx              <- REPLACES (hides nav on settings)
+
+TEST
+- Profile tab -> gear icon (top right) -> Settings.
+- Toggle "Pause my profile" -> you vanish from the deck (other account
+  won't see you). Toggle off -> you're back.
+- Block someone (from a chat), then Settings -> Blocked users -> Unblock.
+- Delete account -> confirm -> account and all data gone, back to login.
+  (Test this on a THROWAWAY account, not your main one -- it's permanent.)
+
+NOTE: Language is English-only for now; the switch is there so adding
+Turkish later is just data, not a rebuild.
