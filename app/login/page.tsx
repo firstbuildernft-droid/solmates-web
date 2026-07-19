@@ -1,17 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { GREEN, INK, MUTE, font } from "@/lib/theme";
 import Logo from "@/components/Logo";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const codeRef = useRef<HTMLInputElement>(null);
 
-  async function send() {
+  async function sendCode() {
     if (!email.includes("@")) {
       setError("That doesn't look like an email address.");
       return;
@@ -20,16 +24,43 @@ export default function LoginPage() {
     setError(null);
 
     const supabase = createClient();
+    // No emailRedirectTo -> Supabase sends a 6-digit CODE instead of a
+    // magic link. shouldCreateUser lets brand-new emails sign up.
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
-      },
+      options: { shouldCreateUser: true },
     });
 
     setBusy(false);
-    if (error) setError(error.message);
-    else setSent(true);
+    if (error) return setError(error.message);
+    setStep("code");
+    setTimeout(() => codeRef.current?.focus(), 100);
+  }
+
+  async function verify() {
+    if (code.length !== 6) {
+      setError("Enter the 6-digit code from your email.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: code,
+      type: "email",
+    });
+
+    if (error) {
+      setBusy(false);
+      setError("That code didn't work. Check it and try again.");
+      return;
+    }
+
+    // Signed in. Send them to onboarding (which forwards to the deck if
+    // they've already onboarded).
+    router.replace("/onboarding");
   }
 
   return (
@@ -50,42 +81,11 @@ export default function LoginPage() {
           <Logo size={44} fontSize={32} />
         </div>
 
-        {sent ? (
+        {step === "email" ? (
           <>
-            <p style={{ color: MUTE, fontSize: 15, lineHeight: 1.5 }}>
-              Check your email. We sent a sign-in link to{" "}
-              <b style={{ color: INK }}>{email}</b>.
-            </p>
-            <button
-              onClick={() => {
-                setSent(false);
-                setEmail("");
-              }}
-              style={{
-                background: "none",
-                border: "none",
-                color: GREEN,
-                fontWeight: 700,
-                fontSize: 14,
-                padding: "12px 0",
-                cursor: "pointer",
-              }}
-            >
-              Use a different email
-            </button>
-          </>
-        ) : (
-          <>
-            <p
-              style={{
-                color: MUTE,
-                fontSize: 15,
-                lineHeight: 1.5,
-                marginBottom: 24,
-              }}
-            >
-              Enter your email and we'll send you a sign-in link. No password
-              to remember.
+            <p style={{ color: MUTE, fontSize: 15, lineHeight: 1.5, marginBottom: 24 }}>
+              Enter your email and we&apos;ll send you a 6-digit code. No
+              password to remember.
             </p>
 
             <input
@@ -94,55 +94,112 @@ export default function LoginPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && send()}
+              onKeyDown={(e) => e.key === "Enter" && sendCode()}
               placeholder="you@example.com"
+              style={inputStyle}
+            />
+
+            {error && <ErrorText>{error}</ErrorText>}
+
+            <button onClick={sendCode} disabled={busy} style={btnStyle(busy)}>
+              {busy ? "Sending..." : "Send code"}
+            </button>
+          </>
+        ) : (
+          <>
+            <p style={{ color: MUTE, fontSize: 15, lineHeight: 1.5, marginBottom: 6 }}>
+              We sent a 6-digit code to <b style={{ color: INK }}>{email}</b>.
+            </p>
+            <p style={{ color: MUTE, fontSize: 13, marginBottom: 20 }}>
+              Enter it below. It expires in a few minutes.
+            </p>
+
+            <input
+              ref={codeRef}
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+              onKeyDown={(e) => e.key === "Enter" && verify()}
+              placeholder="000000"
               style={{
-                width: "100%",
-                boxSizing: "border-box",
-                border: "1px solid rgba(11,31,18,.14)",
-                borderRadius: 12,
-                padding: "14px 16px",
-                fontSize: 16, // 16px or iOS zooms the page on focus
-                fontFamily: font,
-                outline: "none",
-                marginBottom: 10,
+                ...inputStyle,
+                textAlign: "center",
+                fontSize: 28,
+                fontWeight: 800,
+                letterSpacing: 8,
+                fontFamily: "monospace",
               }}
             />
 
-            {error && (
-              <div
-                style={{
-                  color: "#dc2626",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  marginBottom: 10,
-                }}
-              >
-                {error}
-              </div>
-            )}
+            {error && <ErrorText>{error}</ErrorText>}
 
-            <button
-              onClick={send}
-              disabled={busy}
-              style={{
-                width: "100%",
-                background: busy ? MUTE : GREEN,
-                color: "#fff",
-                border: "none",
-                borderRadius: 999,
-                padding: "14px",
-                fontWeight: 800,
-                fontSize: 15.5,
-                fontFamily: font,
-                cursor: busy ? "default" : "pointer",
-              }}
-            >
-              {busy ? "Sending..." : "Send link"}
+            <button onClick={verify} disabled={busy} style={btnStyle(busy)}>
+              {busy ? "Verifying..." : "Verify"}
             </button>
+
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+              <button
+                onClick={() => { setStep("email"); setCode(""); setError(null); }}
+                style={linkBtn}
+              >
+                Change email
+              </button>
+              <button onClick={sendCode} disabled={busy} style={linkBtn}>
+                Resend code
+              </button>
+            </div>
           </>
         )}
       </div>
     </main>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  boxSizing: "border-box",
+  border: "1px solid rgba(11,31,18,.14)",
+  borderRadius: 12,
+  padding: "14px 16px",
+  fontSize: 16,
+  fontFamily: font,
+  outline: "none",
+  marginBottom: 10,
+};
+
+function btnStyle(busy: boolean): React.CSSProperties {
+  return {
+    width: "100%",
+    background: busy ? MUTE : GREEN,
+    color: "#fff",
+    border: "none",
+    borderRadius: 999,
+    padding: "14px",
+    fontWeight: 800,
+    fontSize: 15.5,
+    fontFamily: font,
+    cursor: busy ? "default" : "pointer",
+  };
+}
+
+const linkBtn: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  color: GREEN,
+  fontWeight: 700,
+  fontSize: 13.5,
+  padding: "10px 0",
+  cursor: "pointer",
+  fontFamily: font,
+};
+
+function ErrorText({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ color: "#dc2626", fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
+      {children}
+    </div>
   );
 }

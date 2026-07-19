@@ -1,0 +1,42 @@
+6-DIGIT CODE LOGIN (replaces magic link)
+========================================
+
+No migration. One code file + ONE dashboard change (important).
+
+STEP 1 -- Supabase email template (REQUIRED, do this or codes won't send)
+-------------------------------------------------------------------------
+Supabase -> Authentication -> Emails -> "Magic Link" template.
+The default template sends a LINK. We need it to send the CODE.
+Replace the template body with something like:
+
+    <h2>Your Solmates code</h2>
+    <p>Enter this code to sign in:</p>
+    <p style="font-size:28px;font-weight:bold;letter-spacing:4px">{{ .Token }}</p>
+    <p>It expires in a few minutes.</p>
+
+The key part is {{ .Token }} -- that's the 6-digit code. (The old
+template used {{ .ConfirmationURL }} -- the link. Remove that.)
+Save.
+
+STEP 2 -- copy the file in
+--------------------------
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\otp\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
+
+STEP 3 -- push
+--------------
+   cd C:\Users\onur1\Documents\solmates-web
+   git add .
+   git commit -m "6-digit code login"
+   git push
+
+FILE
+  app/login/page.tsx   <- REPLACES (email -> code, two steps)
+
+TEST
+- Open the site -> enter email -> "Send code".
+- Check email -> a 6-digit number (not a link).
+- Type it in -> you're in. Works on any device, any browser, no redirect.
+
+NOTE: you can leave all the Redirect URL / callback settings as they are;
+the code flow doesn't use them. Nothing else to change.
