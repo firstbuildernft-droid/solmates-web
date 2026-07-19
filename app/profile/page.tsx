@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Ruler, Dumbbell, Wine, Cigarette, TrendingUp, X, ShieldCheck, Settings } from "lucide-react";
+import { Ruler, Dumbbell, Wine, Cigarette, TrendingUp, X, ShieldCheck, Settings, Eye, MapPin } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [tradeInput, setTradeInput] = useState("");
   const [faceVerified, setFaceVerified] = useState(false);
+  const [city, setCity] = useState<string | null>(null);
 
   const [bio, setBio] = useState("");
   const [height, setHeight] = useState("");
@@ -61,6 +62,7 @@ export default function ProfilePage() {
       setDrinks(profile.drinks);
       setSmokes(profile.smokes);
       setFaceVerified(profile.face_verified ?? false);
+      setCity(profile.city ?? null);
       setPhotos(ph ?? []);
       setTrades(tr ?? []);
       setLoading(false);
@@ -131,6 +133,27 @@ export default function ProfilePage() {
           </Link>
         </div>
 
+        <Link
+          href="/profile/preview"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            textDecoration: "none",
+            background: "rgba(34,197,94,.08)",
+            border: "1px solid rgba(34,197,94,.28)",
+            borderRadius: 14,
+            padding: "12px 15px",
+            marginBottom: 12,
+            color: GREEN_DK,
+            fontWeight: 800,
+            fontSize: 14,
+          }}
+        >
+          <Eye size={17} /> Preview my profile
+        </Link>
+
         {!faceVerified && (
           <Link
             href="/face"
@@ -177,6 +200,18 @@ export default function ProfilePage() {
             </span>
           </div>
         )}
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(11,31,18,.03)", borderRadius: 12, padding: "11px 14px", marginBottom: 4, marginTop: 6 }}>
+          <MapPin size={17} color={MUTE} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: INK }}>
+              {city || "Location not set"}
+            </div>
+            <div style={{ fontSize: 11.5, color: MUTE }}>
+              Others see your distance, never your exact spot.
+            </div>
+          </div>
+        </div>
 
         <Label>Photos</Label>
         <PhotoGrid userId={userId} photos={photos} onChange={setPhotos} />
