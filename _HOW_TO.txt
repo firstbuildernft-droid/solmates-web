@@ -1,0 +1,36 @@
+CITY NAME FROM LOCATION
+=======================
+One file. No migration. No env vars. Free geocoding (OpenStreetMap).
+
+FIRST -- clear the stale "New York" from your account, in Supabase SQL Editor:
+
+   update profiles set city = null
+   where id in (select id from auth.users where email = 'firstbuildernft@gmail.com');
+
+THEN copy the file + push:
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\city\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
+
+   cd C:\Users\onur1\Documents\solmates-web
+   git add .
+   git commit -m "city name from location"
+   git push
+
+FILE
+  lib/location.ts   <- REPLACES (adds reverse-geocoding on save)
+
+HOW IT WORKS
+When your location saves, it now also looks up the city name from your
+coordinates (free OpenStreetMap service) and stores it. So the text
+updates to your real city instead of staying stale.
+
+TEST (after push + Vercel green)
+- Open the deck once (this re-saves your location -> fetches "Bursa").
+- Go to Profile -> the location row should now say Bursa, not New York.
+- If it still says the old value, hard-refresh (Ctrl+Shift+R) and reopen
+  the deck once more so a fresh save runs.
+
+NOTE: the city updates whenever location is re-captured (opening the deck).
+It won't change the instant you move -- it refreshes on app open, like the
+rest of the location system.

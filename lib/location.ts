@@ -16,9 +16,31 @@ export function getBrowserLocation(): Promise<{ lat: number; lng: number } | nul
 }
 
 // Store it. The RPC fuzzes before saving; the raw coords never persist.
+// We also reverse-geocode to a city name so the profile can show it.
 export async function saveLocation(lat: number, lng: number) {
   const supabase = createClient();
   await supabase.rpc("set_location", { raw_lat: lat, raw_lng: lng });
+
+  // Turn coords into a city name (free, no key). Best-effort — if it
+  // fails, the location still saved, we just won't have a fresh city.
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`,
+      { headers: { "Accept-Language": "en" } }
+    );
+    const data = await res.json();
+    const a = data.address ?? {};
+    const city =
+      a.city || a.town || a.village || a.county || a.state || a.province || null;
+    if (city) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) await supabase.from("profiles").update({ city }).eq("id", user.id);
+    }
+  } catch {
+    /* geocode is best-effort — the location itself already saved */
+  }
 }
 
 // One call: try GPS, and if we got it, store it. Returns whether we got a
