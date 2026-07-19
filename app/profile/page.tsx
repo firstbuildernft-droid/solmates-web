@@ -7,6 +7,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
 import PhotoGrid, { type Photo } from "@/components/PhotoGrid";
+import { HeightPicker, WeightPicker } from "@/components/Pickers";
+import MapPopup from "@/components/MapPopup";
+import { getMyLocation } from "@/lib/location";
 
 type Trade = { id: string; label: string };
 
@@ -18,6 +21,13 @@ export default function ProfilePage() {
   const [tradeInput, setTradeInput] = useState("");
   const [faceVerified, setFaceVerified] = useState(false);
   const [city, setCity] = useState<string | null>(null);
+  const [showHeight, setShowHeight] = useState(false);
+  const [showWeight, setShowWeight] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [heightUnit, setHeightUnit] = useState<"cm" | "ft">("cm");
+  const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
+  const [myLat, setMyLat] = useState<number | null>(null);
+  const [myLng, setMyLng] = useState<number | null>(null);
 
   const [bio, setBio] = useState("");
   const [height, setHeight] = useState("");
@@ -63,6 +73,7 @@ export default function ProfilePage() {
       setSmokes(profile.smokes);
       setFaceVerified(profile.face_verified ?? false);
       setCity(profile.city ?? null);
+      getMyLocation().then((loc) => { setMyLat(loc.lat); setMyLng(loc.lng); });
       setPhotos(ph ?? []);
       setTrades(tr ?? []);
       setLoading(false);
@@ -201,17 +212,21 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(11,31,18,.03)", borderRadius: 12, padding: "11px 14px", marginBottom: 4, marginTop: 6 }}>
+        <button
+          onClick={() => setShowMap(true)}
+          style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, background: "rgba(11,31,18,.03)", border: "none", borderRadius: 12, padding: "11px 14px", marginBottom: 4, marginTop: 6, cursor: "pointer", textAlign: "left", fontFamily: font }}
+        >
           <MapPin size={17} color={MUTE} />
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13.5, fontWeight: 700, color: INK }}>
               {city || "Location not set"}
             </div>
             <div style={{ fontSize: 11.5, color: MUTE }}>
-              Others see your distance, never your exact spot.
+              Tap to see your area on a map.
             </div>
           </div>
-        </div>
+          <span style={{ color: MUTE, fontWeight: 800 }}>›</span>
+        </button>
 
         <Label>Photos</Label>
         <PhotoGrid userId={userId} photos={photos} onChange={setPhotos} />
@@ -241,19 +256,17 @@ export default function ProfilePage() {
 
         <Label>Basics</Label>
         <div style={{ display: "flex", gap: 8 }}>
-          <NumField
+          <PickRow
             icon={Ruler}
             label="Height"
-            unit="cm"
-            value={height}
-            onChange={setHeight}
+            display={height ? fmtHeight(Number(height), heightUnit) : "—"}
+            onClick={() => setShowHeight(true)}
           />
-          <NumField
+          <PickRow
             icon={Dumbbell}
             label="Weight"
-            unit="kg"
-            value={weight}
-            onChange={setWeight}
+            display={weight ? fmtWeight(Number(weight), weightUnit) : "—"}
+            onClick={() => setShowWeight(true)}
           />
         </div>
 
@@ -373,6 +386,28 @@ export default function ProfilePage() {
         >
           {saved ? "Saved" : "Save"}
         </button>
+
+        {showHeight && (
+          <HeightPicker
+            valueCm={height ? Number(height) : null}
+            unit={heightUnit}
+            setUnit={setHeightUnit}
+            onSave={(cm) => setHeight(String(cm))}
+            onClose={() => setShowHeight(false)}
+          />
+        )}
+        {showWeight && (
+          <WeightPicker
+            valueKg={weight ? Number(weight) : null}
+            unit={weightUnit}
+            setUnit={setWeightUnit}
+            onSave={(kg) => setWeight(String(kg))}
+            onClose={() => setShowWeight(false)}
+          />
+        )}
+        {showMap && (
+          <MapPopup lat={myLat} lng={myLng} city={city} onClose={() => setShowMap(false)} />
+        )}
       </div>
     </main>
   );
@@ -395,62 +430,47 @@ function Label({ children }: { children: React.ReactNode }) {
   );
 }
 
-function NumField({
+function fmtHeight(cm: number, unit: "cm" | "ft") {
+  if (unit === "cm") return `${cm} cm`;
+  const inches = Math.round(cm / 2.54);
+  return `${Math.floor(inches / 12)}'${inches % 12}"`;
+}
+
+function fmtWeight(kg: number, unit: "kg" | "lbs") {
+  if (unit === "kg") return `${kg} kg`;
+  return `${Math.round(kg * 2.20462)} lbs`;
+}
+
+function PickRow({
   icon: Icon,
   label,
-  unit,
-  value,
-  onChange,
+  display,
+  onClick,
 }: {
   icon: React.ElementType;
   label: string;
-  unit: string;
-  value: string;
-  onChange: (v: string) => void;
+  display: string;
+  onClick: () => void;
 }) {
   return (
-    <div
+    <button
+      onClick={onClick}
       style={{
         flex: 1,
         border: "1px solid rgba(11,31,18,.12)",
         borderRadius: 12,
         padding: "9px 12px",
+        background: "#fff",
+        cursor: "pointer",
+        textAlign: "left",
+        fontFamily: font,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 5,
-          color: MUTE,
-          fontSize: 11.5,
-          fontWeight: 700,
-        }}
-      >
+      <div style={{ display: "flex", alignItems: "center", gap: 5, color: MUTE, fontSize: 11.5, fontWeight: 700 }}>
         <Icon size={13} /> {label}
       </div>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-        <input
-          value={value}
-          inputMode="numeric"
-          onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
-          placeholder="—"
-          style={{
-            width: "100%",
-            border: "none",
-            outline: "none",
-            fontSize: 16,
-            fontWeight: 800,
-            color: INK,
-            fontFamily: font,
-            padding: 0,
-          }}
-        />
-        <span style={{ fontSize: 12, color: MUTE, fontWeight: 700 }}>
-          {unit}
-        </span>
-      </div>
-    </div>
+      <div style={{ fontSize: 16, fontWeight: 800, color: INK, marginTop: 2 }}>{display}</div>
+    </button>
   );
 }
 

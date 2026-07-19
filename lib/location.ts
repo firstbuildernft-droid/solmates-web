@@ -62,3 +62,45 @@ export async function refreshLocationIfStale() {
 
   await captureLocation();
 }
+
+// The user's OWN stored (fuzzed) coordinates, for showing them their map.
+// These are already jittered — even the owner only sees the approximate
+// point, which is fine, and means there's no exact coordinate anywhere on
+// the client.
+export async function getMyLocation(): Promise<{
+  lat: number | null;
+  lng: number | null;
+  city: string | null;
+  has: boolean;
+}> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { lat: null, lng: null, city: null, has: false };
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("lat, lng, city")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  return {
+    lat: data?.lat ?? null,
+    lng: data?.lng ?? null,
+    city: data?.city ?? null,
+    has: data?.lat != null && data?.lng != null,
+  };
+}
+
+// Does the browser currently have location permission granted?
+export async function locationPermissionState(): Promise<
+  "granted" | "denied" | "prompt" | "unknown"
+> {
+  try {
+    const p = await navigator.permissions?.query({ name: "geolocation" as PermissionName });
+    return (p?.state as "granted" | "denied" | "prompt") ?? "unknown";
+  } catch {
+    return "unknown";
+  }
+}
