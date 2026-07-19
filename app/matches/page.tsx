@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useLongPress, ActionSheet } from "@/components/LongPress";
+import { MatchesSkeleton } from "@/components/Skeletons";
 import { fetchMatches, type MatchRow } from "@/lib/chat";
 import { publicUrl } from "@/lib/photos";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
@@ -49,7 +50,7 @@ export default function MatchesPage() {
     setRows((rs) => rs.filter((r) => r.match_id !== m.match_id));
   }
 
-  if (loading) return null;
+  if (loading) return <MatchesSkeleton />;
 
   const fresh = rows.filter((r) => !r.last_message);
   const talking = rows.filter((r) => r.last_message);

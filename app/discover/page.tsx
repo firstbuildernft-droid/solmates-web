@@ -9,6 +9,7 @@ import { refreshLocationIfStale, getMyLocation, captureLocation, ensureCity } fr
 import { publicUrl } from "@/lib/photos";
 import Card from "@/components/Card";
 import ExpandedProfile from "@/components/ExpandedProfile";
+import { DeckSkeleton } from "@/components/Skeletons";
 import Logo from "@/components/Logo";
 import { GREEN, GREEN_LT, INK, MUTE, font } from "@/lib/theme";
 
@@ -99,7 +100,7 @@ export default function DiscoverPage() {
     else setDrag(0);
   }
 
-  if (loading) return null;
+  if (loading) return <DeckSkeleton />;
 
   return (
     <div

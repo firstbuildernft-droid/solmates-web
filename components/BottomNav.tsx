@@ -53,6 +53,10 @@ export default function BottomNav() {
     };
   }, [path]);
 
+  useEffect(() => {
+    ["/discover", "/matches", "/profile"].forEach((r) => router.prefetch(r));
+  }, [router]);
+
   const inThread = /^\/matches\/[^/]+$/.test(path);
   if (!show || inThread || HIDE_ON.some((p) => path.startsWith(p))) return null;
 

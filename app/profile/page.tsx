@@ -10,6 +10,7 @@ import PhotoGrid, { type Photo } from "@/components/PhotoGrid";
 import { HeightPicker, WeightPicker } from "@/components/Pickers";
 import MapPopup from "@/components/MapPopup";
 import PromptEditor from "@/components/PromptEditor";
+import { ProfileSkeleton } from "@/components/Skeletons";
 import { getMyLocation } from "@/lib/location";
 
 type Trade = { id: string; label: string };
@@ -122,7 +123,7 @@ export default function ProfilePage() {
     await createClient().from("trades").delete().eq("id", id);
   }
 
-  if (loading || !userId) return null;
+  if (loading || !userId) return <ProfileSkeleton />;
 
   return (
     <main

@@ -1,11 +1,25 @@
-FIX: preview page build error
-=============================
-Corrected app/profile/preview/page.tsx (adds prompt_qs/prompt_as).
-Use this instead of hand-editing on GitHub if that's easier.
+FIX: tab switch delay (blank screen)
+====================================
+No migration. Replaces the blank "frozen" moment when switching tabs with
+an instant shimmer skeleton, and prefetches tab code so taps feel snappy.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\previewfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\speed\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix preview page prompts"
+   git commit -m "loading skeletons + nav prefetch"
    git push
+
+FILES
+  components/Skeletons.tsx    <- NEW (shimmer placeholders)
+  components/BottomNav.tsx    <- REPLACES (prefetches tab routes)
+  app/discover/page.tsx       <- REPLACES (skeleton instead of blank)
+  app/matches/page.tsx        <- REPLACES (skeleton instead of blank)
+  app/profile/page.tsx        <- REPLACES (skeleton instead of blank)
+
+WHAT CHANGES
+Before: tap a tab -> blank screen -> content pops in (feels frozen).
+After:  tap a tab -> instant shimmer placeholder -> content fades in.
+
+This doesn't make the DATA load faster -- it makes the app FEEL instant,
+which is the actual problem. Same trick Instagram/Bumble use.
