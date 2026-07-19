@@ -16,6 +16,8 @@ export type Candidate = {
   wallet_verified: boolean;
   sol_balance: number | null;
   distance_km: number | null;
+  prompt_qs: string[];
+  prompt_as: string[];
   photos: string[];
   trades: string[];
 };

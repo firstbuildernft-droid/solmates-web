@@ -1,31 +1,44 @@
-CITY FIX v2 -- backfills city from existing coordinates
-=======================================================
-The last version only geocoded on a FRESH GPS capture. But your account
-already has coordinates, so it never re-ran. This version geocodes the
-coordinates you ALREADY have, every time you open the deck.
+PROMPTS + BUMBLE PROFILE + BIO PLACEHOLDER + NAV FLASH
+======================================================
 
-No migration. No env vars.
+1. Run migration: Supabase -> SQL Editor -> paste 0011_prompts.sql -> Run.
 
-DO NOT clear the city this time -- the code overwrites it on deck open.
+2. Copy files in:
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\city2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\prompts\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
+
+3. Push:
 
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "backfill city from coordinates"
+   git commit -m "prompts, bumble profile, nav flash"
    git push
 
 FILES
-  lib/location.ts            <- REPLACES (adds ensureCity)
-  app/discover/page.tsx      <- REPLACES (calls ensureCity on open)
+  0011_prompts.sql            <- run in Supabase (adds prompts table + updates discover)
+  lib/prompts.ts              <- NEW (the question library -- edit freely)
+  lib/deck.ts                 <- REPLACES (prompts in type)
+  components/ExpandedProfile.tsx <- NEW (Bumble-style scroll profile)
+  components/PromptEditor.tsx  <- NEW (pick + answer prompts)
+  components/Card.tsx          <- REPLACES (adds expand button)
+  app/discover/page.tsx        <- REPLACES (tap-to-expand)
+  app/profile/page.tsx         <- REPLACES (bio placeholder + prompt editor)
+  app/globals.css              <- REPLACES (nav green flash)
 
-TEST (after Vercel green)
-1. Open the DECK (Discover tab) -- this is what triggers the city lookup.
-2. Wait 2-3 seconds (the geocode call).
-3. Go to Profile -> should now say Bursa.
-4. Still New York? Hard-refresh Ctrl+Shift+R, open Discover again, wait,
-   then check Profile.
+WHAT'S NEW
+1. Bio placeholder is now "Tell us about yourself".
+2. Prompts: Profile tab -> "Prompts" section -> Add a prompt -> pick a
+   question -> write an answer. Up to 3. Edit the question list in
+   lib/prompts.ts anytime.
+3. Bumble profile: on the swipe deck, tap the round chevron button
+   (bottom-right of a card) -> full scrolling profile opens: photo, info,
+   photo, prompt, photo... Close with the X. Quick swipe still works as
+   before -- expand is optional.
+4. Nav flash: tapping a bottom tab flashes half-transparent green.
 
-The key change: it now updates the city from your stored coordinates on
-every deck open, instead of only after a brand-new GPS capture.
+TEST
+- Profile -> add a prompt or two -> Save.
+- Discover -> tap the chevron on a card -> scroll the full profile ->
+  your prompts appear between photos.
+- Tap the bottom nav icons -> green flash.

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   MapPin,
+  ChevronUp,
   ShieldCheck,
   Wallet,
   Ruler,
@@ -20,11 +21,13 @@ export default function Card({
   dragOffset = 0,
   isTop,
   style,
+  onExpand,
 }: {
   p: Candidate;
   dragOffset?: number;
   isTop: boolean;
   style?: React.CSSProperties;
+  onExpand?: () => void;
 }) {
   const [i, setI] = useState(0);
 
@@ -89,6 +92,32 @@ export default function Card({
       <div style={{ position: "absolute", top: 16, right: 12, zIndex: 5 }}>
         <BalancePill sol={p.wallet_verified ? p.sol_balance : null} />
       </div>
+
+      {onExpand && (
+        <button
+          onClick={onExpand}
+          data-tap
+          style={{
+            position: "absolute",
+            bottom: 16,
+            right: 12,
+            zIndex: 7,
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            border: "none",
+            background: "rgba(255,255,255,.92)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 2px 10px rgba(11,31,18,.2)",
+          }}
+          aria-label="See full profile"
+        >
+          <ChevronUp size={22} color="#0b1f12" strokeWidth={2.6} />
+        </button>
+      )}
 
       <div
         style={{

@@ -8,6 +8,7 @@ import { fetchDeck, swipe, type Candidate } from "@/lib/deck";
 import { refreshLocationIfStale, getMyLocation, captureLocation, ensureCity } from "@/lib/location";
 import { publicUrl } from "@/lib/photos";
 import Card from "@/components/Card";
+import ExpandedProfile from "@/components/ExpandedProfile";
 import Logo from "@/components/Logo";
 import { GREEN, GREEN_LT, INK, MUTE, font } from "@/lib/theme";
 
@@ -20,6 +21,7 @@ export default function DiscoverPage() {
   const [dragging, setDragging] = useState(false);
   const [flyOut, setFlyOut] = useState<"left" | "right" | null>(null);
   const [matched, setMatched] = useState<Candidate | null>(null);
+  const [expanded, setExpanded] = useState<Candidate | null>(null);
   const startX = useRef(0);
 
   useEffect(() => {
@@ -171,6 +173,7 @@ export default function DiscoverPage() {
               p={p}
               isTop={isTop && !flyOut}
               dragOffset={isTop ? drag : 0}
+              onExpand={isTop ? () => setExpanded(p) : undefined}
               style={{
                 transform:
                   fly ?? `scale(${1 - depth * 0.045}) translateY(${depth * 10}px)`,
@@ -195,6 +198,10 @@ export default function DiscoverPage() {
             <Heart size={26} strokeWidth={3} fill={GREEN} />
           </ActionBtn>
         </div>
+      )}
+
+      {expanded && (
+        <ExpandedProfile p={expanded} onClose={() => setExpanded(null)} />
       )}
 
       {matched && (

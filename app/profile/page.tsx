@@ -9,6 +9,7 @@ import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
 import PhotoGrid, { type Photo } from "@/components/PhotoGrid";
 import { HeightPicker, WeightPicker } from "@/components/Pickers";
 import MapPopup from "@/components/MapPopup";
+import PromptEditor from "@/components/PromptEditor";
 import { getMyLocation } from "@/lib/location";
 
 type Trade = { id: string; label: string };
@@ -237,7 +238,7 @@ export default function ProfilePage() {
           onChange={(e) => setBio(e.target.value)}
           maxLength={300}
           rows={3}
-          placeholder="Solana degen by night, yoga by morning."
+          placeholder="Tell us about yourself"
           style={{
             width: "100%",
             boxSizing: "border-box",
@@ -279,6 +280,9 @@ export default function ProfilePage() {
           value={smokes}
           onChange={setSmokes}
         />
+
+        <Label>Prompts</Label>
+        {userId && <PromptEditor userId={userId} />}
 
         <Label>Best trades</Label>
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>

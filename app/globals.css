@@ -130,3 +130,15 @@ button:active {
     transition: none !important;
   }
 }
+
+/* Bottom-nav tap: flash a half-transparent green behind the icon. */
+[data-tap]:active {
+  transform: scale(0.9);
+}
+nav [data-tap] {
+  border-radius: 12px;
+  transition: background .15s ease, transform .12s cubic-bezier(.22,1,.36,1);
+}
+nav [data-tap]:active {
+  background: rgba(34, 197, 94, 0.18);
+}
