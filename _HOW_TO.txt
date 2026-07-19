@@ -1,25 +1,39 @@
-FIX: tab switch delay (blank screen)
-====================================
-No migration. Replaces the blank "frozen" moment when switching tabs with
-an instant shimmer skeleton, and prefetches tab code so taps feel snappy.
+SMOOTH TABS -- all tabs stay mounted (Instagram-style)
+======================================================
+No migration. This restructures the 3 tabs so switching NEVER unmounts
+them -> instant, no flash.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\speed\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+*** This is a bigger change. If anything looks broken after deploying,
+    there's a ROLLBACK at the bottom. ***
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\smooth\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "loading skeletons + nav prefetch"
+   git commit -m "keep tabs mounted for smooth switching"
    git push
 
-FILES
-  components/Skeletons.tsx    <- NEW (shimmer placeholders)
-  components/BottomNav.tsx    <- REPLACES (prefetches tab routes)
-  app/discover/page.tsx       <- REPLACES (skeleton instead of blank)
-  app/matches/page.tsx        <- REPLACES (skeleton instead of blank)
-  app/profile/page.tsx        <- REPLACES (skeleton instead of blank)
+NEW FILES
+  components/TabShell.tsx              <- holds all 3 tabs, toggles visibility
+  components/tabs_DiscoverContent.tsx  <- the old discover page, as a component
+  components/tabs_MatchesContent.tsx   <- the old matches page, as a component
+  components/tabs_ProfileContent.tsx   <- the old profile page, as a component
+REPLACED (now tiny -- just render the shell)
+  app/discover/page.tsx
+  app/matches/page.tsx
+  app/profile/page.tsx
 
-WHAT CHANGES
-Before: tap a tab -> blank screen -> content pops in (feels frozen).
-After:  tap a tab -> instant shimmer placeholder -> content fades in.
+HOW IT WORKS
+All three tabs mount once and stay alive. Switching tabs only flips which
+is visible (display) -- nothing tears down, so it's instant with no flash.
 
-This doesn't make the DATA load faster -- it makes the app FEEL instant,
-which is the actual problem. Same trick Instagram/Bumble use.
+TEST
+- Switch Discover <-> Matches <-> Profile fast. Should be instant, no
+  flash of a half-drawn page.
+- Open a chat, unmatch, report -- all still work (those are separate pages).
+- Swipe, match, edit profile, prompts -- all unchanged.
+
+ROLLBACK (if something's wrong)
+  git revert HEAD --no-edit
+  git push
+That undoes just this change and redeploys the previous working version.
