@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Heart, X, Star, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchDeck, swipe, type Candidate } from "@/lib/deck";
-import { refreshLocationIfStale, getMyLocation, captureLocation } from "@/lib/location";
+import { refreshLocationIfStale, getMyLocation, captureLocation, ensureCity } from "@/lib/location";
 import { publicUrl } from "@/lib/photos";
 import Card from "@/components/Card";
 import Logo from "@/components/Logo";
@@ -43,7 +43,7 @@ export default function DiscoverPage() {
         // none stored (e.g. first time on this phone), prompt now.
         getMyLocation().then((loc) => {
           if (!loc.has) captureLocation();
-          else refreshLocationIfStale();
+          else { refreshLocationIfStale(); ensureCity(); }
         });
         setDeck(await fetchDeck());
       } catch {

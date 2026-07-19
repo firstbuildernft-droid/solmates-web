@@ -1,36 +1,31 @@
-CITY NAME FROM LOCATION
-=======================
-One file. No migration. No env vars. Free geocoding (OpenStreetMap).
+CITY FIX v2 -- backfills city from existing coordinates
+=======================================================
+The last version only geocoded on a FRESH GPS capture. But your account
+already has coordinates, so it never re-ran. This version geocodes the
+coordinates you ALREADY have, every time you open the deck.
 
-FIRST -- clear the stale "New York" from your account, in Supabase SQL Editor:
+No migration. No env vars.
 
-   update profiles set city = null
-   where id in (select id from auth.users where email = 'firstbuildernft@gmail.com');
+DO NOT clear the city this time -- the code overwrites it on deck open.
 
-THEN copy the file + push:
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\city\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\city2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
 
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "city name from location"
+   git commit -m "backfill city from coordinates"
    git push
 
-FILE
-  lib/location.ts   <- REPLACES (adds reverse-geocoding on save)
+FILES
+  lib/location.ts            <- REPLACES (adds ensureCity)
+  app/discover/page.tsx      <- REPLACES (calls ensureCity on open)
 
-HOW IT WORKS
-When your location saves, it now also looks up the city name from your
-coordinates (free OpenStreetMap service) and stores it. So the text
-updates to your real city instead of staying stale.
+TEST (after Vercel green)
+1. Open the DECK (Discover tab) -- this is what triggers the city lookup.
+2. Wait 2-3 seconds (the geocode call).
+3. Go to Profile -> should now say Bursa.
+4. Still New York? Hard-refresh Ctrl+Shift+R, open Discover again, wait,
+   then check Profile.
 
-TEST (after push + Vercel green)
-- Open the deck once (this re-saves your location -> fetches "Bursa").
-- Go to Profile -> the location row should now say Bursa, not New York.
-- If it still says the old value, hard-refresh (Ctrl+Shift+R) and reopen
-  the deck once more so a fresh save runs.
-
-NOTE: the city updates whenever location is re-captured (opening the deck).
-It won't change the instant you move -- it refreshes on app open, like the
-rest of the location system.
+The key change: it now updates the city from your stored coordinates on
+every deck open, instead of only after a brand-new GPS capture.

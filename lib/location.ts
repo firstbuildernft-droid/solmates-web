@@ -126,3 +126,38 @@ export async function locationPermissionState(): Promise<
     return "unknown";
   }
 }
+
+// Backfill the city from the stored coordinates. Runs on deck open. This
+// exists because early accounts have coordinates but a wrong/stale city
+// (or none) — this geocodes what's already stored, no GPS prompt needed.
+// Cheap and idempotent; if the city is already correct it just rewrites
+// the same value.
+export async function ensureCity() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("lat, lng")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (data?.lat == null || data?.lng == null) return;
+
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${data.lat}&lon=${data.lng}&zoom=10`,
+      { headers: { "Accept-Language": "en" } }
+    );
+    const g = await res.json();
+    const a = g.address ?? {};
+    const city =
+      a.city || a.town || a.village || a.county || a.state || a.province || null;
+    if (city) await supabase.from("profiles").update({ city }).eq("id", user.id);
+  } catch {
+    /* best-effort */
+  }
+}
