@@ -1,44 +1,11 @@
-PROMPTS + BUMBLE PROFILE + BIO PLACEHOLDER + NAV FLASH
-======================================================
+FIX: preview page build error
+=============================
+Corrected app/profile/preview/page.tsx (adds prompt_qs/prompt_as).
+Use this instead of hand-editing on GitHub if that's easier.
 
-1. Run migration: Supabase -> SQL Editor -> paste 0011_prompts.sql -> Run.
-
-2. Copy files in:
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\prompts\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\previewfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
-
-3. Push:
-
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "prompts, bumble profile, nav flash"
+   git commit -m "fix preview page prompts"
    git push
-
-FILES
-  0011_prompts.sql            <- run in Supabase (adds prompts table + updates discover)
-  lib/prompts.ts              <- NEW (the question library -- edit freely)
-  lib/deck.ts                 <- REPLACES (prompts in type)
-  components/ExpandedProfile.tsx <- NEW (Bumble-style scroll profile)
-  components/PromptEditor.tsx  <- NEW (pick + answer prompts)
-  components/Card.tsx          <- REPLACES (adds expand button)
-  app/discover/page.tsx        <- REPLACES (tap-to-expand)
-  app/profile/page.tsx         <- REPLACES (bio placeholder + prompt editor)
-  app/globals.css              <- REPLACES (nav green flash)
-
-WHAT'S NEW
-1. Bio placeholder is now "Tell us about yourself".
-2. Prompts: Profile tab -> "Prompts" section -> Add a prompt -> pick a
-   question -> write an answer. Up to 3. Edit the question list in
-   lib/prompts.ts anytime.
-3. Bumble profile: on the swipe deck, tap the round chevron button
-   (bottom-right of a card) -> full scrolling profile opens: photo, info,
-   photo, prompt, photo... Close with the X. Quick swipe still works as
-   before -- expand is optional.
-4. Nav flash: tapping a bottom tab flashes half-transparent green.
-
-TEST
-- Profile -> add a prompt or two -> Save.
-- Discover -> tap the chevron on a card -> scroll the full profile ->
-  your prompts appear between photos.
-- Tap the bottom nav icons -> green flash.

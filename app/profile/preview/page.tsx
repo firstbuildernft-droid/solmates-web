@@ -96,6 +96,8 @@ export default function PreviewPage() {
         photos: photoPaths,
         trades: (trades ?? []).map((t) => t.label),
         distance_km: null, // your own card has no distance
+        prompt_qs: [],
+        prompt_as: [],
       });
       setLoading(false);
     })();
