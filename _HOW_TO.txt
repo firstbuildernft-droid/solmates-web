@@ -1,28 +1,19 @@
-SETTINGS SLIDES IN (no more blank flash)
-========================================
-Settings now slides in from the right as an overlay instead of navigating
-to a separate page -- so no route change, no blank flash. Opens and closes
-instantly.
+FIX: settings blank during slide-in
+===================================
+Two changes: settings now renders instantly (was showing blank while it
+loaded data), and the slide is faster (180ms). No more blank beat.
 
-No migration.
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\settingsslide\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\settingsfast\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "settings slides in as overlay"
+   git commit -m "settings renders instantly, faster slide"
    git push
 
 FILES
-  components/SettingsPanel.tsx        <- NEW (settings as a panel, was the page)
-  components/tabs_ProfileContent.tsx  <- REPLACES (gear opens the slide-in)
-  app/globals.css                    <- REPLACES (slide-in animation)
-
-NOTE: the old /settings route still exists as a fallback, but the gear
-icon now opens the smooth overlay instead.
+  components/SettingsPanel.tsx   <- REPLACES (no blank while loading)
+  app/globals.css               <- REPLACES (faster slide)
 
 TEST
-- Profile -> gear icon -> settings slides in from the right, instant.
-- Back arrow -> slides away, no blank flash.
-- Everything inside settings (pause, blocked users, change email, delete,
-  sign out) works the same.
+- Profile -> gear -> settings slides in fast, content is there immediately
+  (email/toggles fill in instantly, no blank).

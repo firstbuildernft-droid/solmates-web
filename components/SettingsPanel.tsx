@@ -115,7 +115,6 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
     }
   }
 
-  if (loading) return null;
 
   // ---- blocked users sub-screen ----
   if (showBlocks) {

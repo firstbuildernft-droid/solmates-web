@@ -160,5 +160,5 @@ html {
   to   { transform: translateX(0); }
 }
 [data-slidein] {
-  animation: slideInRight .26s cubic-bezier(.22,1,.36,1);
+  animation: slideInRight .18s cubic-bezier(.22,1,.36,1);
 }
