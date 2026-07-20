@@ -1,18 +1,26 @@
-FIX: app tilts left/right when switching tabs
-==============================================
-One file. The shift was the scrollbar appearing/disappearing between tabs
-(different content heights). This forces a constant scrollbar gutter so
-the width never changes -> tabs stay perfectly still.
+FIX: mobile login bounces back to email when entering code
+==========================================================
+One file. Two fixes in it:
+1. If the code fails as type "email", it retries as "signup" (the usual
+   reason a correct code gets rejected for new users).
+2. Shows the REAL error from Supabase instead of a generic message.
+3. Remembers the code step if the mobile browser reloads the page (so you
+   don't get bounced back to entering your email).
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\notilt\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\loginfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "stop tab tilt (stable scrollbar)"
+   git commit -m "fix mobile login code step"
    git push
 
 FILE
-  app/globals.css   <- REPLACES
+  app/login/page.tsx   <- REPLACES
 
-TEST
-- Switch between all tabs -> the app should NOT shift sideways anymore.
+TEST ON PHONE
+- Enter email -> get code -> enter code -> should log in, NOT bounce.
+- If it still fails, note the exact red error message it now shows and
+  send it to me -- that message names the real cause.
+
+NOTE: GitHub was having an outage earlier. If push fails, wait and retry,
+or check githubstatus.com.

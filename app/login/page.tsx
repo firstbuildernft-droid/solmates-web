@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { GREEN, INK, MUTE, font } from "@/lib/theme";
@@ -10,6 +10,18 @@ export default function LoginPage() {
   const router = useRouter();
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
+
+  // Restore in-progress login if the page remounts (mobile browsers can
+  // reload the tab when you switch to your email app for the code).
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("login_state");
+      if (saved) {
+        const { step: st, email: em } = JSON.parse(saved);
+        if (st === "code" && em) { setEmail(em); setStep("code"); }
+      }
+    } catch {}
+  }, []);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,30 +46,45 @@ export default function LoginPage() {
     setBusy(false);
     if (error) return setError(error.message);
     setStep("code");
+    try { sessionStorage.setItem("login_state", JSON.stringify({ step: "code", email })); } catch {}
     setTimeout(() => codeRef.current?.focus(), 100);
   }
 
   async function verify() {
-    if (code.length !== 6) {
-      setError("Enter the 6-digit code from your email.");
+    if (code.length < 6) {
+      setError("Enter the code from your email.");
       return;
     }
     setBusy(true);
     setError(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({
+
+    // Try the standard email OTP first. If Supabase says the type is
+    // wrong (new signups sometimes need "signup"), fall back to that
+    // before giving up — this is the usual cause of a good code failing.
+    let { error } = await supabase.auth.verifyOtp({
       email,
       token: code,
       type: "email",
     });
 
     if (error) {
+      const retry = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: "signup",
+      });
+      error = retry.error;
+    }
+
+    if (error) {
       setBusy(false);
-      setError("That code didn't work. Check it and try again.");
+      setError(error.message || "That code didn't work. Check it and try again.");
       return;
     }
 
+    try { sessionStorage.removeItem("login_state"); } catch {}
     // Signed in. Send them to onboarding (which forwards to the deck if
     // they've already onboarded).
     router.replace("/onboarding");
@@ -84,7 +111,7 @@ export default function LoginPage() {
         {step === "email" ? (
           <>
             <p style={{ color: MUTE, fontSize: 15, lineHeight: 1.5, marginBottom: 24 }}>
-              Enter your email and we&apos;ll send you a 6-digit code. No
+              Enter your email and we&apos;ll send you a code. No
               password to remember.
             </p>
 
@@ -108,7 +135,7 @@ export default function LoginPage() {
         ) : (
           <>
             <p style={{ color: MUTE, fontSize: 15, lineHeight: 1.5, marginBottom: 6 }}>
-              We sent a 6-digit code to <b style={{ color: INK }}>{email}</b>.
+              We sent a code to <b style={{ color: INK }}>{email}</b>.
             </p>
             <p style={{ color: MUTE, fontSize: 13, marginBottom: 20 }}>
               Enter it below. It expires in a few minutes.
@@ -119,17 +146,17 @@ export default function LoginPage() {
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              maxLength={6}
+              maxLength={8}
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               onKeyDown={(e) => e.key === "Enter" && verify()}
-              placeholder="000000"
+              placeholder="00000000"
               style={{
                 ...inputStyle,
                 textAlign: "center",
                 fontSize: 28,
                 fontWeight: 800,
-                letterSpacing: 8,
+                letterSpacing: 6,
                 fontFamily: "monospace",
               }}
             />
@@ -142,7 +169,7 @@ export default function LoginPage() {
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
               <button
-                onClick={() => { setStep("email"); setCode(""); setError(null); }}
+                onClick={() => { setStep("email"); setCode(""); setError(null); try { sessionStorage.removeItem("login_state"); } catch {} }}
                 style={linkBtn}
               >
                 Change email
