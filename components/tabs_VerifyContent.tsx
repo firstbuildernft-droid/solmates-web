@@ -113,6 +113,29 @@ export default function VerifyContent() {
             >
               {address.slice(0, 4)}...{address.slice(-4)}
             </div>
+
+            <button
+              onClick={() => {
+                if (window.confirm("Change your wallet? You'll enter a new address and send 0.1 SOL again to verify it. Your current wallet stays until the new one is confirmed.")) {
+                  setAddress("");
+                  setState("unverified");
+                }
+              }}
+              style={{
+                marginTop: 26,
+                background: "none",
+                border: `1px solid rgba(11,31,18,.18)`,
+                borderRadius: 999,
+                padding: "10px 20px",
+                fontWeight: 800,
+                fontSize: 13.5,
+                fontFamily: font,
+                color: INK,
+                cursor: "pointer",
+              }}
+            >
+              Change wallet
+            </button>
           </div>
         ) : state === "unverified" ? (
           <>

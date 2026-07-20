@@ -1,27 +1,31 @@
-CHAT OPENS INSTANTLY (preloaded)
-================================
-The chat now opens already showing the person's name/photo (passed from
-the matches list) instead of re-fetching everything first. So no
-skeleton-then-swap flash when opening a chat -- it's populated immediately,
-only the message bubbles stream in.
+CHANGE VERIFIED WALLET
+======================
+Verified users can now change their wallet: Verify tab -> "Change wallet"
+-> enter new address -> send 0.1 SOL again -> new wallet replaces old.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\chatinstant\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+No migration -- reuses the existing verify backend.
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\changewallet\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "chat opens preloaded"
+   git commit -m "change verified wallet"
    git push
 
-FILES
-  components/ChatPanel.tsx            <- REPLACES (accepts preloaded meta)
-  components/tabs_MatchesContent.tsx  <- REPLACES (passes the match data in)
+FILE
+  components/tabs_VerifyContent.tsx   <- REPLACES (adds Change wallet button)
+
+HOW IT WORKS
+- Verify tab, when already verified, now has a "Change wallet" button.
+- Tap it -> confirm dialog -> resets to the address-entry step.
+- Enter new wallet -> send 0.1 SOL from it -> verified, replaces old.
+- Charges 0.1 SOL again (same anti-spam gate as first time), as you wanted.
 
 TEST
-- Matches -> tap a chat -> header (name/photo) is there INSTANTLY, no flash.
-  Messages fill in right after.
+- Verify tab (verified account) -> Change wallet -> confirm -> enter a
+  different address -> send 0.1 SOL -> new wallet shows verified.
 
-NOTE ON PREVIEW: profile preview still fetches its full data when opened,
-so it shows a brief card-shaped placeholder first. It's not blank, but if
-that brief placeholder still bugs you, tell me and I'll preload it from the
-profile tab the same way (a bit more wiring since preview builds a full
-card).
+KNOWN (minor): when you start a change, verification briefly drops to
+"pending" until the new payment confirms (the confirm dialog warns about
+this). Fully keeping the old wallet live during the switch would need a
+small backend change -- tell me if you want that.
