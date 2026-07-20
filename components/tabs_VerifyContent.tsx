@@ -170,12 +170,19 @@ export default function VerifyContent() {
           </>
         ) : (
           <>
-            <p style={{ color: MUTE, fontSize: 14.5, lineHeight: 1.5, marginBottom: 18 }}>
-              Send exactly <b style={{ color: GREEN_DK }}>{AMOUNT} SOL</b> from{" "}
-              <b style={{ color: INK, fontFamily: "monospace" }}>
-                {address.slice(0, 4)}...{address.slice(-4)}
-              </b>
-            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+              <img
+                src="/bird.png"
+                alt=""
+                style={{ width: 74, height: 74, objectFit: "contain", flexShrink: 0 }}
+              />
+              <p style={{ color: MUTE, fontSize: 14.5, lineHeight: 1.5, margin: 0 }}>
+                Send exactly <b style={{ color: GREEN_DK }}>{AMOUNT} SOL</b> from{" "}
+                <b style={{ color: INK, fontFamily: "monospace" }}>
+                  {address.slice(0, 4)}...{address.slice(-4)}
+                </b>
+              </p>
+            </div>
 
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
               <div

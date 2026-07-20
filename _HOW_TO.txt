@@ -1,20 +1,32 @@
-FIX: discover card is a skinny tall strip
-==========================================
-The card was collapsing to a narrow vertical strip (sized to a tall
-photo's shape) instead of filling the card width. Caused by the tab
-wrapper fighting the deck's flex layout after the tab restructure.
+ADD THE BIRD MASCOT TO VERIFY TAB
+=================================
+The bird points at the "send 0.1 SOL" instruction on the Verify tab.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\cardfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+STEP 1 -- put the image in your public folder (rename it bird.png first):
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\bird.png" "C:\Users\onur1\Documents\solmates-web\public\bird.png"
+
+   (Whatever the image is actually named, copy it to public\bird.png.
+    It must be at public/bird.png -- same folder as your logo.)
+
+STEP 2 -- copy the component + push:
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\bird\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix skinny discover card"
+   git commit -m "add bird mascot to verify"
    git push
 
-FILES
-  components/TabShell.tsx             <- REPLACES (discover wrapper -> block)
-  components/tabs_DiscoverContent.tsx <- REPLACES (card stack minHeight:0)
+FILE
+  components/tabs_VerifyContent.tsx   <- REPLACES (bird next to send-SOL step)
 
 TEST
-- Discover tab -> the card should fill the normal width again, photo
-  cropped to fit (not stretched into a strip).
+- Verify tab -> enter a wallet -> Continue -> the send-SOL screen now has
+  the bird pointing at the "Send exactly 0.1 SOL" line.
+
+IF THE BIRD DOESN'T SHOW: the image isn't at public/bird.png. Check the
+filename/location. It's referenced as /bird.png in the code.
+
+Don't love the size/position? Tell me -- easy to move him to the top, make
+him bigger, etc.
