@@ -1,35 +1,34 @@
-SMOOTH TABS v2 -- state switching, no router (the real fix)
-===========================================================
-The last version still used the router to switch tabs, which caused the
-lag + flash. This version switches tabs with pure STATE -- instant, no
-navigation, no flash. The tab bar now lives inside the shell.
+SMOOTH TABS v3 -- Verify is now an in-shell tab
+===============================================
+Fixes: Verify was a separate route (slow + showed extra page when
+switching to/from it). Now Verify is a state tab like the others, so ALL
+four tabs switch instantly with no flash.
 
-Requires the smooth.zip files already in place (tabs_*Content.tsx). If you
-deployed smooth.zip, you have them. This just replaces 2 files on top.
+Builds on smooth.zip + smooth2.zip (needs tabs_*Content.tsx). You have
+those deployed. This adds Verify to the shell.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\smooth2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\smooth3\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "state-based tab switching (no router)"
+   git commit -m "verify as in-shell tab"
    git push
 
 FILES
-  components/TabShell.tsx    <- REPLACES (owns tab state + its own nav bar)
-  components/BottomNav.tsx   <- REPLACES (hides on tab routes; shell has its own nav)
-
-WHAT CHANGES
-Tapping a tab no longer navigates -- it flips a state variable, which is
-instant. All 3 tabs stay mounted. No flash, no lag between them.
-Verify tab + chat threads + settings are still normal routes.
+  components/TabShell.tsx            <- REPLACES (verify is now a state tab)
+  components/tabs_VerifyContent.tsx  <- NEW (verify page as a component)
+  components/BottomNav.tsx           <- REPLACES (hide on /verify too)
+  app/verify/page.tsx               <- REPLACES (renders the shell)
 
 TEST
-- Tap Discover / Matches / Profile fast -> should be INSTANT, no flash,
-  no lag.
-- The URL still updates (address bar shows /matches etc).
-- Tap Verify (if you're a male account) -> still opens normally.
-- Open a chat from Matches -> still works.
+- Switch between ALL tabs incl. Verify -> all instant, no flash, no extra
+  page.
+- Profile: the blank-first-time should be gone now that it stays mounted.
 
-ROLLBACK if needed:
+If Profile STILL flashes blank on first open only: that's the heavy
+content (map + pickers) rendering once. Tell me and I'll make it render
+lighter until you interact.
+
+ROLLBACK:
   git revert HEAD --no-edit
   git push

@@ -1,26 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Flame, MessageCircle, User, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { GREEN, MUTE, font } from "@/lib/theme";
 import DiscoverContent from "@/components/tabs_DiscoverContent";
 import MatchesContent from "@/components/tabs_MatchesContent";
 import ProfileContent from "@/components/tabs_ProfileContent";
+import VerifyContent from "@/components/tabs_VerifyContent";
 
-type Tab = "discover" | "matches" | "profile";
+type Tab = "discover" | "matches" | "profile" | "verify";
 
 // The whole tab experience in ONE component with NO routing between tabs.
 // Tapping a tab flips `active` state -> instant, synchronous, no router,
 // no route transition, no flash. All three tab contents stay mounted;
 // only `display` changes. This is how a native tab bar behaves.
 //
-// (Verify, chat threads, settings etc. are still real routes -- they're
-// not part of the tab trio, so tapping Verify uses the router.)
+// Verify is now an in-shell tab too. Chat threads and settings remain
+// real routes (they open on top of the tabs).
 
 export default function TabShell({ active }: { active: Tab }) {
-  const router = useRouter();
   const [tab, setTab] = useState<Tab>(active);
   const [gender, setGender] = useState<string | null>(null);
   const [matchesBadge, setMatchesBadge] = useState(0);
@@ -58,11 +57,11 @@ export default function TabShell({ active }: { active: Tab }) {
     return () => { if (channel) createClient().removeChannel(channel); };
   }, []);
 
-  const navTabs: { key: Tab | "verify"; icon: any; label: string; badge: number; route?: string }[] = [
+  const navTabs: { key: Tab; icon: any; label: string; badge: number }[] = [
     { key: "discover", icon: Flame, label: "Discover", badge: 0 },
     { key: "matches", icon: MessageCircle, label: "Matches", badge: matchesBadge },
     ...(gender === "man"
-      ? [{ key: "verify" as const, icon: ShieldCheck, label: "Verify", badge: 0, route: "/verify" }]
+      ? [{ key: "verify" as const, icon: ShieldCheck, label: "Verify", badge: 0 }]
       : []),
     { key: "profile", icon: User, label: "Profile", badge: 0 },
   ];
@@ -78,6 +77,11 @@ export default function TabShell({ active }: { active: Tab }) {
       <div style={{ display: tab === "profile" ? "block" : "none", minHeight: "100dvh" }}>
         <ProfileContent />
       </div>
+      {gender === "man" && (
+        <div style={{ display: tab === "verify" ? "block" : "none", minHeight: "100dvh" }}>
+          <VerifyContent />
+        </div>
+      )}
 
       <nav
         style={{
@@ -87,13 +91,13 @@ export default function TabShell({ active }: { active: Tab }) {
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
-        {navTabs.map(({ key, icon: Icon, label, badge, route }) => {
+        {navTabs.map(({ key, icon: Icon, label, badge }) => {
           const isActive = key === tab;
           return (
             <button
               key={key}
               data-tap
-              onClick={() => (route ? router.push(route) : go(key as Tab))}
+              onClick={() => go(key as Tab)}
               style={{
                 flex: 1, background: "none", border: "none", padding: "9px 0 8px",
                 cursor: "pointer", display: "flex", flexDirection: "column",
