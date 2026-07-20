@@ -28,14 +28,22 @@ export default function OnboardingPage() {
       } = await supabase.auth.getUser();
       if (!user) return router.replace("/login");
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
-        .select("id")
+        .select("id, onboarded")
         .eq("id", user.id)
         .maybeSingle();
 
+      // If a profile row exists at all, they've been here — go to the app.
+      // (Guarding on the row's existence, not just onboarded, so an
+      // existing user never gets shown the form again.)
       if (data) router.replace("/");
-      else setChecking(false);
+      else if (!error) setChecking(false);
+      else {
+        // If the check itself errored, don't trap them on a blank screen —
+        // let them proceed; the upsert on submit is safe either way.
+        setChecking(false);
+      }
     })();
   }, [router]);
 
@@ -64,7 +72,7 @@ export default function OnboardingPage() {
     } = await supabase.auth.getUser();
     if (!user) return router.replace("/login");
 
-    const { error } = await supabase.from("profiles").insert({
+    const { error } = await supabase.from("profiles").upsert({
       id: user.id,
       display_name: name.trim(),
       birthdate,
