@@ -1,34 +1,18 @@
-SMOOTH TABS v3 -- Verify is now an in-shell tab
-===============================================
-Fixes: Verify was a separate route (slow + showed extra page when
-switching to/from it). Now Verify is a state tab like the others, so ALL
-four tabs switch instantly with no flash.
+FIX: app tilts left/right when switching tabs
+==============================================
+One file. The shift was the scrollbar appearing/disappearing between tabs
+(different content heights). This forces a constant scrollbar gutter so
+the width never changes -> tabs stay perfectly still.
 
-Builds on smooth.zip + smooth2.zip (needs tabs_*Content.tsx). You have
-those deployed. This adds Verify to the shell.
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\smooth3\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\notilt\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "verify as in-shell tab"
+   git commit -m "stop tab tilt (stable scrollbar)"
    git push
 
-FILES
-  components/TabShell.tsx            <- REPLACES (verify is now a state tab)
-  components/tabs_VerifyContent.tsx  <- NEW (verify page as a component)
-  components/BottomNav.tsx           <- REPLACES (hide on /verify too)
-  app/verify/page.tsx               <- REPLACES (renders the shell)
+FILE
+  app/globals.css   <- REPLACES
 
 TEST
-- Switch between ALL tabs incl. Verify -> all instant, no flash, no extra
-  page.
-- Profile: the blank-first-time should be gone now that it stays mounted.
-
-If Profile STILL flashes blank on first open only: that's the heavy
-content (map + pickers) rendering once. Tell me and I'll make it render
-lighter until you interact.
-
-ROLLBACK:
-  git revert HEAD --no-edit
-  git push
+- Switch between all tabs -> the app should NOT shift sideways anymore.
