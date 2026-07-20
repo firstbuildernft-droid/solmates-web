@@ -1,22 +1,20 @@
-FIX: duplicate key / asked to onboard again on sign-in
-======================================================
-One file. Two fixes:
-1. Existing accounts now skip onboarding reliably (was showing the form
-   again for already-onboarded users).
-2. Submit uses UPSERT instead of INSERT -- so even if it does run for an
-   existing profile, it updates instead of crashing with "duplicate key".
+FIX: after entering code it bounces to login instead of your account
+====================================================================
+One file. The redirect fired before the session cookie was ready, so the
+next page saw "not logged in" and bounced to /login. Now it waits for the
+session, picks the right destination, and does a hard navigation so the
+login state is fully in place.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\onbfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\redirectfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix onboarding duplicate key"
+   git commit -m "fix post-login redirect"
    git push
 
 FILE
-  app/onboarding/page.tsx   <- REPLACES
+  app/login/page.tsx   <- REPLACES
 
 TEST
-- Sign in to firstbuildernft@gmail.com -> should go STRAIGHT to the deck,
-  no onboarding form, no error.
-- Sign up with a brand-new email -> onboarding shows normally -> save works.
+- Enter email -> code -> should land straight in your account (deck for
+  existing users, onboarding for new ones). No bounce to login.
