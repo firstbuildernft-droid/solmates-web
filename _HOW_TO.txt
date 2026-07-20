@@ -1,29 +1,10 @@
-CHAT + PREVIEW OPEN AS OVERLAYS (no more extra screen)
-======================================================
-The real fix: chat and profile preview now open as slide-in overlays on
-top of the current screen -- NO route navigation, so no blank "extra
-screen" before/after. Same approach that made settings smooth.
+FIX: duplicate style key build error
+====================================
+One file. Removes the duplicate background/border in the preview button.
 
-No migration.
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\overlays\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\overlayfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "chat and preview as overlays"
+   git commit -m "fix duplicate style key"
    git push
-
-FILES
-  components/ChatPanel.tsx             <- NEW (chat as a panel, was a route)
-  components/PreviewPanel.tsx          <- NEW (preview as a panel, was a route)
-  components/tabs_MatchesContent.tsx   <- REPLACES (opens chat as overlay)
-  components/tabs_ProfileContent.tsx   <- REPLACES (opens preview as overlay)
-
-TEST
-- Matches -> tap a chat -> slides in, NO blank screen. Back -> slides
-  away, instant.
-- Profile -> Preview my profile -> slides in, no blank. Back -> instant.
-
-NOTE: the old /matches/[id] and /profile/preview routes still exist as
-fallbacks (direct links work), but tapping in-app now uses the smooth
-overlay.

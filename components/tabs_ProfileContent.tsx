@@ -152,7 +152,7 @@ export default function ProfileContent() {
 
         <button
           onClick={() => setShowPreview(true)}
-          style={{ background: "none", border: "none", cursor: "pointer", width: "100%", 
+          style={{ cursor: "pointer", width: "100%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
