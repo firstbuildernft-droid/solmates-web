@@ -1,4 +1,5 @@
 "use client";
+import { ChatSkeleton } from "@/components/Skeletons";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -121,7 +122,7 @@ export default function ThreadPage() {
     router.replace("/matches");
   }
 
-  if (loading || !meta) return null;
+  if (loading || !meta) return <ChatSkeleton />;
 
   return (
     <div

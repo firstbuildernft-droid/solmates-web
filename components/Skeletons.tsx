@@ -75,3 +75,37 @@ export function ProfileSkeleton() {
     </div>
   );
 }
+
+// Chat thread: header bar + a few message bubbles.
+export function ChatSkeleton() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100dvh", fontFamily: font }}>
+      <Keyframes />
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderBottom: "1px solid rgba(11,31,18,.07)" }}>
+        <div style={{ ...shimmer, width: 24, height: 24, borderRadius: 6 }} />
+        <div style={{ ...shimmer, width: 38, height: 38, borderRadius: "50%" }} />
+        <div style={{ ...shimmer, width: 120, height: 16 }} />
+      </div>
+      <div style={{ flex: 1, padding: "16px 14px", display: "flex", flexDirection: "column", gap: 12 }}>
+        {[
+          { me: false, w: "60%" }, { me: true, w: "45%" }, { me: false, w: "70%" }, { me: true, w: "35%" },
+        ].map((m, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: m.me ? "flex-end" : "flex-start" }}>
+            <div style={{ ...shimmer, width: m.w, height: 38, borderRadius: 17 }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Profile preview: one big card placeholder.
+export function PreviewSkeleton() {
+  return (
+    <div style={{ padding: "14px 16px", fontFamily: font }}>
+      <Keyframes />
+      <div style={{ ...shimmer, width: 90, height: 22, marginBottom: 12 }} />
+      <div style={{ ...shimmer, width: "100%", aspectRatio: "3 / 4.2", borderRadius: 20 }} />
+    </div>
+  );
+}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import Card from "@/components/Card";
+import { PreviewSkeleton } from "@/components/Skeletons";
 import type { Candidate } from "@/lib/deck";
 import { GREEN, INK, MUTE, font } from "@/lib/theme";
 
@@ -103,7 +104,7 @@ export default function PreviewPage() {
     })();
   }, [router]);
 
-  if (loading) return null;
+  if (loading) return <PreviewSkeleton />;
 
   return (
     <main
