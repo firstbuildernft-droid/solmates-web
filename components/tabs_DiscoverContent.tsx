@@ -119,7 +119,7 @@ export default function DiscoverContent() {
       </div>
 
       <div
-        style={{ flex: 1, position: "relative", margin: "4px 16px 8px", touchAction: "pan-y" }}
+        style={{ flex: 1, position: "relative", width: "auto", margin: "4px 16px 8px", touchAction: "pan-y", minHeight: 0 }}
         onMouseDown={(e) => {
           startX.current = e.clientX;
           setDragging(true);

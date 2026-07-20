@@ -68,7 +68,7 @@ export default function TabShell({ active }: { active: Tab }) {
 
   return (
     <>
-      <div style={{ display: tab === "discover" ? "flex" : "none", flexDirection: "column", minHeight: "100dvh" }}>
+      <div style={{ display: tab === "discover" ? "block" : "none", minHeight: "100dvh" }}>
         <DiscoverContent />
       </div>
       <div style={{ display: tab === "matches" ? "block" : "none", minHeight: "100dvh" }}>

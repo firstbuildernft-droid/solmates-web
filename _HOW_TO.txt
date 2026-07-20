@@ -1,31 +1,20 @@
-CHANGE VERIFIED WALLET
-======================
-Verified users can now change their wallet: Verify tab -> "Change wallet"
--> enter new address -> send 0.1 SOL again -> new wallet replaces old.
+FIX: discover card is a skinny tall strip
+==========================================
+The card was collapsing to a narrow vertical strip (sized to a tall
+photo's shape) instead of filling the card width. Caused by the tab
+wrapper fighting the deck's flex layout after the tab restructure.
 
-No migration -- reuses the existing verify backend.
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\changewallet\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\cardfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "change verified wallet"
+   git commit -m "fix skinny discover card"
    git push
 
-FILE
-  components/tabs_VerifyContent.tsx   <- REPLACES (adds Change wallet button)
-
-HOW IT WORKS
-- Verify tab, when already verified, now has a "Change wallet" button.
-- Tap it -> confirm dialog -> resets to the address-entry step.
-- Enter new wallet -> send 0.1 SOL from it -> verified, replaces old.
-- Charges 0.1 SOL again (same anti-spam gate as first time), as you wanted.
+FILES
+  components/TabShell.tsx             <- REPLACES (discover wrapper -> block)
+  components/tabs_DiscoverContent.tsx <- REPLACES (card stack minHeight:0)
 
 TEST
-- Verify tab (verified account) -> Change wallet -> confirm -> enter a
-  different address -> send 0.1 SOL -> new wallet shows verified.
-
-KNOWN (minor): when you start a change, verification briefly drops to
-"pending" until the new payment confirms (the confirm dialog warns about
-this). Fully keeping the old wallet live during the switch would need a
-small backend change -- tell me if you want that.
+- Discover tab -> the card should fill the normal width again, photo
+  cropped to fit (not stretched into a strip).
