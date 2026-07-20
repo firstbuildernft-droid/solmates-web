@@ -6,6 +6,7 @@ import { ShieldCheck, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useLongPress, ActionSheet } from "@/components/LongPress";
 import { MatchesSkeleton } from "@/components/Skeletons";
+import ChatPanel from "@/components/ChatPanel";
 import { fetchMatches, type MatchRow } from "@/lib/chat";
 import { publicUrl } from "@/lib/photos";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
@@ -16,6 +17,7 @@ export default function MatchesContent() {
   const [meId, setMeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sheetFor, setSheetFor] = useState<MatchRow | null>(null);
+  const [openChatId, setOpenChatId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -111,7 +113,7 @@ export default function MatchesContent() {
             {fresh.map((r) => (
               <button
                 key={r.match_id}
-                onClick={() => router.push(`/matches/${r.match_id}`)}
+                onClick={() => setOpenChatId(r.match_id)}
                 style={{
                   border: "none",
                   background: "none",
@@ -159,12 +161,18 @@ export default function MatchesContent() {
               key={r.match_id}
               r={r}
               meId={meId}
-              onOpen={() => router.push(`/matches/${r.match_id}`)}
+              onOpen={() => setOpenChatId(r.match_id)}
               onLong={() => setSheetFor(r)}
             />
           ))}
         </>
       )}
+      {openChatId && (
+        <div data-slidein style={{ position: "fixed", inset: 0, zIndex: 80, background: "#fff", maxWidth: 430, margin: "0 auto" }}>
+          <ChatPanel matchId={openChatId} onClose={() => setOpenChatId(null)} />
+        </div>
+      )}
+
       {sheetFor && (
         <ActionSheet
           title={sheetFor.other_name}

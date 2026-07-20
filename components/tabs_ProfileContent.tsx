@@ -10,6 +10,7 @@ import PhotoGrid, { type Photo } from "@/components/PhotoGrid";
 import { HeightPicker, WeightPicker } from "@/components/Pickers";
 import MapPopup from "@/components/MapPopup";
 import SettingsPanel from "@/components/SettingsPanel";
+import PreviewPanel from "@/components/PreviewPanel";
 import PromptEditor from "@/components/PromptEditor";
 import { ProfileSkeleton } from "@/components/Skeletons";
 import { getMyLocation } from "@/lib/location";
@@ -28,6 +29,7 @@ export default function ProfileContent() {
   const [showWeight, setShowWeight] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [heightUnit, setHeightUnit] = useState<"cm" | "ft">("cm");
   const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
   const [myLat, setMyLat] = useState<number | null>(null);
@@ -148,9 +150,9 @@ export default function ProfileContent() {
           </button>
         </div>
 
-        <Link
-          href="/profile/preview"
-          style={{
+        <button
+          onClick={() => setShowPreview(true)}
+          style={{ background: "none", border: "none", cursor: "pointer", width: "100%", 
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -167,7 +169,7 @@ export default function ProfileContent() {
           }}
         >
           <Eye size={17} /> Preview my profile
-        </Link>
+        </button>
 
         {!faceVerified && (
           <Link
@@ -418,6 +420,11 @@ export default function ProfileContent() {
         {showSettings && (
           <div data-slidein style={{ position: "fixed", inset: 0, zIndex: 80, background: "#fff", overflowY: "auto", maxWidth: 430, margin: "0 auto" }}>
             <SettingsPanel onClose={() => setShowSettings(false)} />
+          </div>
+        )}
+        {showPreview && (
+          <div data-slidein style={{ position: "fixed", inset: 0, zIndex: 80, background: "#fff", overflowY: "auto", maxWidth: 430, margin: "0 auto" }}>
+            <PreviewPanel onClose={() => setShowPreview(false)} />
           </div>
         )}
       </div>

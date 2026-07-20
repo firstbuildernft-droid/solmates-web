@@ -1,25 +1,29 @@
-FIX: blank flash on chat + profile preview
-==========================================
-Both showed a blank screen while loading (same pattern as settings). Now
-they show a matching skeleton instantly instead of blank -> no flash.
+CHAT + PREVIEW OPEN AS OVERLAYS (no more extra screen)
+======================================================
+The real fix: chat and profile preview now open as slide-in overlays on
+top of the current screen -- NO route navigation, so no blank "extra
+screen" before/after. Same approach that made settings smooth.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\smoothdeep\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+No migration.
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\overlays\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "skeletons for chat and preview"
+   git commit -m "chat and preview as overlays"
    git push
 
 FILES
-  components/Skeletons.tsx            <- REPLACES (adds chat + preview skeletons)
-  app/matches/[id]/page.tsx           <- REPLACES (skeleton instead of blank)
-  app/profile/preview/page.tsx        <- REPLACES (skeleton instead of blank)
+  components/ChatPanel.tsx             <- NEW (chat as a panel, was a route)
+  components/PreviewPanel.tsx          <- NEW (preview as a panel, was a route)
+  components/tabs_MatchesContent.tsx   <- REPLACES (opens chat as overlay)
+  components/tabs_ProfileContent.tsx   <- REPLACES (opens preview as overlay)
 
 TEST
-- Open a chat -> shows a chat-shaped placeholder instantly, then messages.
-- Back from chat -> instant (Matches tab is already alive).
-- Open profile preview -> card placeholder instantly, then your card.
+- Matches -> tap a chat -> slides in, NO blank screen. Back -> slides
+  away, instant.
+- Profile -> Preview my profile -> slides in, no blank. Back -> instant.
 
-NOTE: chat and preview are still separate routes (they're deep links, which
-is correct). The skeleton removes the blank -- opening/closing is now smooth
-without restructuring them into the shell.
+NOTE: the old /matches/[id] and /profile/preview routes still exist as
+fallbacks (direct links work), but tapping in-app now uses the smooth
+overlay.
