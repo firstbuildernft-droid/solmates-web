@@ -1,32 +1,21 @@
-ADD THE BIRD MASCOT TO VERIFY TAB
-=================================
-The bird points at the "send 0.1 SOL" instruction on the Verify tab.
+FIX: swipe buttons overlapping the bottom nav
+==============================================
+The X / star / heart buttons were hidden behind the bottom nav bar. Added
+clearance so they sit above it.
 
-STEP 1 -- put the image in your public folder (rename it bird.png first):
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\bird.png" "C:\Users\onur1\Documents\solmates-web\public\bird.png"
-
-   (Whatever the image is actually named, copy it to public\bird.png.
-    It must be at public/bird.png -- same folder as your logo.)
-
-STEP 2 -- copy the component + push:
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\bird\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\btnfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "add bird mascot to verify"
+   git commit -m "fix swipe buttons behind nav"
    git push
 
 FILE
-  components/tabs_VerifyContent.tsx   <- REPLACES (bird next to send-SOL step)
+  components/tabs_DiscoverContent.tsx   <- REPLACES
 
 TEST
-- Verify tab -> enter a wallet -> Continue -> the send-SOL screen now has
-  the bird pointing at the "Send exactly 0.1 SOL" line.
+- Discover -> the X/star/heart buttons should sit fully above the bottom
+  nav, not cut off behind it.
 
-IF THE BIRD DOESN'T SHOW: the image isn't at public/bird.png. Check the
-filename/location. It's referenced as /bird.png in the code.
-
-Don't love the size/position? Tell me -- easy to move him to the top, make
-him bigger, etc.
+If they're now too high or too low, tell me the exact gap and I'll nudge
+the number (currently 84px clearance).

@@ -188,7 +188,7 @@ export default function DiscoverContent() {
       </div>
 
       {deck.length > 0 && (
-        <div style={{ display: "flex", justifyContent: "center", gap: 18, padding: "6px 0 20px" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 18, padding: "6px 0 84px" }}>
           <ActionBtn onClick={() => commit("left")} color="#ef4444" size={58}>
             <X size={28} strokeWidth={3} />
           </ActionBtn>
