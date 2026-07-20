@@ -1,21 +1,21 @@
-FIX: swipe buttons overlapping the bottom nav
-==============================================
-The X / star / heart buttons were hidden behind the bottom nav bar. Added
-clearance so they sit above it.
+FIX: "You matched, say something" flashes in existing chats
+===========================================================
+The empty-state text flashed for a split second when opening a chat that
+already has messages. Now it only appears after messages are actually
+fetched and confirmed empty -- so it never flashes in a real conversation.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\btnfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\nomatch\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix swipe buttons behind nav"
+   git commit -m "fix matched-flash in existing chats"
    git push
 
 FILE
-  components/tabs_DiscoverContent.tsx   <- REPLACES
+  components/ChatPanel.tsx   <- REPLACES
 
 TEST
-- Discover -> the X/star/heart buttons should sit fully above the bottom
-  nav, not cut off behind it.
-
-If they're now too high or too low, tell me the exact gap and I'll nudge
-the number (currently 84px clearance).
+- Open a chat that already has messages -> should go straight to the
+  messages, NO "say something" flash.
+- Open a brand-new match with no messages -> "say something" shows
+  (correctly, after load).

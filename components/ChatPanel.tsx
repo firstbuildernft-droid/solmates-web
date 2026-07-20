@@ -26,6 +26,7 @@ export default function ChatPanel({ matchId, initialMeta, onClose }: { matchId: 
   const [text, setText] = useState("");
   const [menu, setMenu] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [msgsLoaded, setMsgsLoaded] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function ChatPanel({ matchId, initialMeta, onClose }: { matchId: 
       setMeta(m);
 
       setMsgs(await fetchMessages(matchId));
+      setMsgsLoaded(true);
       setLoading(false);
       await markRead(matchId, user.id);
 
@@ -226,7 +228,7 @@ export default function ChatPanel({ matchId, initialMeta, onClose }: { matchId: 
 
       {/* messages */}
       <div style={{ flex: 1, overflowY: "auto", padding: "16px 14px" }}>
-        {msgs.length === 0 && (
+        {msgsLoaded && msgs.length === 0 && (
           <div
             style={{
               textAlign: "center",
