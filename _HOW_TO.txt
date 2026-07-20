@@ -1,39 +1,35 @@
-SMOOTH TABS -- all tabs stay mounted (Instagram-style)
-======================================================
-No migration. This restructures the 3 tabs so switching NEVER unmounts
-them -> instant, no flash.
+SMOOTH TABS v2 -- state switching, no router (the real fix)
+===========================================================
+The last version still used the router to switch tabs, which caused the
+lag + flash. This version switches tabs with pure STATE -- instant, no
+navigation, no flash. The tab bar now lives inside the shell.
 
-*** This is a bigger change. If anything looks broken after deploying,
-    there's a ROLLBACK at the bottom. ***
+Requires the smooth.zip files already in place (tabs_*Content.tsx). If you
+deployed smooth.zip, you have them. This just replaces 2 files on top.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\smooth\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\smooth2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "keep tabs mounted for smooth switching"
+   git commit -m "state-based tab switching (no router)"
    git push
 
-NEW FILES
-  components/TabShell.tsx              <- holds all 3 tabs, toggles visibility
-  components/tabs_DiscoverContent.tsx  <- the old discover page, as a component
-  components/tabs_MatchesContent.tsx   <- the old matches page, as a component
-  components/tabs_ProfileContent.tsx   <- the old profile page, as a component
-REPLACED (now tiny -- just render the shell)
-  app/discover/page.tsx
-  app/matches/page.tsx
-  app/profile/page.tsx
+FILES
+  components/TabShell.tsx    <- REPLACES (owns tab state + its own nav bar)
+  components/BottomNav.tsx   <- REPLACES (hides on tab routes; shell has its own nav)
 
-HOW IT WORKS
-All three tabs mount once and stay alive. Switching tabs only flips which
-is visible (display) -- nothing tears down, so it's instant with no flash.
+WHAT CHANGES
+Tapping a tab no longer navigates -- it flips a state variable, which is
+instant. All 3 tabs stay mounted. No flash, no lag between them.
+Verify tab + chat threads + settings are still normal routes.
 
 TEST
-- Switch Discover <-> Matches <-> Profile fast. Should be instant, no
-  flash of a half-drawn page.
-- Open a chat, unmatch, report -- all still work (those are separate pages).
-- Swipe, match, edit profile, prompts -- all unchanged.
+- Tap Discover / Matches / Profile fast -> should be INSTANT, no flash,
+  no lag.
+- The URL still updates (address bar shows /matches etc).
+- Tap Verify (if you're a male account) -> still opens normally.
+- Open a chat from Matches -> still works.
 
-ROLLBACK (if something's wrong)
+ROLLBACK if needed:
   git revert HEAD --no-edit
   git push
-That undoes just this change and redeploys the previous working version.

@@ -6,7 +6,7 @@ import { Flame, MessageCircle, User, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { GREEN, MUTE, font } from "@/lib/theme";
 
-const HIDE_ON = ["/login", "/onboarding", "/auth", "/admin", "/settings", "/profile/preview"];
+const HIDE_ON = ["/login", "/onboarding", "/auth", "/admin", "/settings", "/profile/preview", "/discover", "/matches", "/profile"];
 
 export default function BottomNav() {
   const path = usePathname();

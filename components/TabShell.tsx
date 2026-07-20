@@ -1,26 +1,124 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Flame, MessageCircle, User, ShieldCheck } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { GREEN, MUTE, font } from "@/lib/theme";
 import DiscoverContent from "@/components/tabs_DiscoverContent";
 import MatchesContent from "@/components/tabs_MatchesContent";
 import ProfileContent from "@/components/tabs_ProfileContent";
 
-// All three tabs mounted together; only `display` changes between them.
-// Nothing unmounts on tab switch, so it's instant with no flash — the
-// Instagram behaviour. Each tab still loads its own data the first time
-// it appears (with its skeleton); after that it's kept alive.
+type Tab = "discover" | "matches" | "profile";
 
-export default function TabShell({ active }: { active: "discover" | "matches" | "profile" }) {
+// The whole tab experience in ONE component with NO routing between tabs.
+// Tapping a tab flips `active` state -> instant, synchronous, no router,
+// no route transition, no flash. All three tab contents stay mounted;
+// only `display` changes. This is how a native tab bar behaves.
+//
+// (Verify, chat threads, settings etc. are still real routes -- they're
+// not part of the tab trio, so tapping Verify uses the router.)
+
+export default function TabShell({ active }: { active: Tab }) {
+  const router = useRouter();
+  const [tab, setTab] = useState<Tab>(active);
+  const [gender, setGender] = useState<string | null>(null);
+  const [matchesBadge, setMatchesBadge] = useState(0);
+
+  // Keep the URL in sync WITHOUT causing a navigation/re-render of content.
+  // history.replaceState changes the address bar silently — no Next.js
+  // route change, so no flash. Deep links still land on the right tab
+  // because each route passes the correct `active`.
+  function go(next: Tab) {
+    setTab(next);
+    const path = "/" + next;
+    window.history.replaceState(null, "", path);
+  }
+
+  useEffect(() => {
+    const supabase = createClient();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("profiles").select("gender").eq("id", user.id).maybeSingle();
+      setGender(data?.gender ?? null);
+      const refresh = async () => {
+        const { data: c } = await supabase.rpc("badge_counts").maybeSingle();
+        const counts = c as { new_matches: number; unread_msgs: number } | null;
+        setMatchesBadge((counts?.new_matches ?? 0) + (counts?.unread_msgs ?? 0));
+      };
+      refresh();
+      channel = supabase
+        .channel("badges")
+        .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, refresh)
+        .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, refresh)
+        .subscribe();
+    })();
+    return () => { if (channel) createClient().removeChannel(channel); };
+  }, []);
+
+  const navTabs: { key: Tab | "verify"; icon: any; label: string; badge: number; route?: string }[] = [
+    { key: "discover", icon: Flame, label: "Discover", badge: 0 },
+    { key: "matches", icon: MessageCircle, label: "Matches", badge: matchesBadge },
+    ...(gender === "man"
+      ? [{ key: "verify" as const, icon: ShieldCheck, label: "Verify", badge: 0, route: "/verify" }]
+      : []),
+    { key: "profile", icon: User, label: "Profile", badge: 0 },
+  ];
+
   return (
     <>
-      <div style={{ display: active === "discover" ? "flex" : "none", flexDirection: "column", minHeight: "100dvh" }}>
+      <div style={{ display: tab === "discover" ? "flex" : "none", flexDirection: "column", minHeight: "100dvh" }}>
         <DiscoverContent />
       </div>
-      <div style={{ display: active === "matches" ? "block" : "none", minHeight: "100dvh" }}>
+      <div style={{ display: tab === "matches" ? "block" : "none", minHeight: "100dvh" }}>
         <MatchesContent />
       </div>
-      <div style={{ display: active === "profile" ? "block" : "none", minHeight: "100dvh" }}>
+      <div style={{ display: tab === "profile" ? "block" : "none", minHeight: "100dvh" }}>
         <ProfileContent />
       </div>
+
+      <nav
+        style={{
+          position: "fixed", bottom: 0, left: 0, right: 0, display: "flex",
+          background: "#fff", borderTop: "1px solid rgba(11,31,18,.08)",
+          maxWidth: 430, margin: "0 auto", zIndex: 30,
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
+        {navTabs.map(({ key, icon: Icon, label, badge, route }) => {
+          const isActive = key === tab;
+          return (
+            <button
+              key={key}
+              data-tap
+              onClick={() => (route ? router.push(route) : go(key as Tab))}
+              style={{
+                flex: 1, background: "none", border: "none", padding: "9px 0 8px",
+                cursor: "pointer", display: "flex", flexDirection: "column",
+                alignItems: "center", gap: 2, color: isActive ? GREEN : MUTE,
+                fontFamily: font, position: "relative",
+              }}
+            >
+              <span style={{ position: "relative", display: "inline-flex" }}>
+                <Icon size={21} strokeWidth={isActive ? 2.6 : 2} />
+                {badge > 0 && (
+                  <span style={{
+                    position: "absolute", top: -6, right: -9, background: "#ef4444",
+                    color: "#fff", fontSize: 10, fontWeight: 900, minWidth: 17, height: 17,
+                    borderRadius: 999, display: "flex", alignItems: "center",
+                    justifyContent: "center", padding: "0 4px", border: "2px solid #fff",
+                  }}>
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
+              </span>
+              <span style={{ fontSize: 10, fontWeight: isActive ? 800 : 600 }}>{label}</span>
+            </button>
+          );
+        })}
+      </nav>
     </>
   );
 }
