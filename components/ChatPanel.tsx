@@ -17,11 +17,11 @@ import {
 import { publicUrl } from "@/lib/photos";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
 
-export default function ChatPanel({ matchId, onClose }: { matchId: string; onClose: () => void }) {
+export default function ChatPanel({ matchId, initialMeta, onClose }: { matchId: string; initialMeta?: MatchRow; onClose: () => void }) {
   const router = useRouter();
 
   const [meId, setMeId] = useState<string | null>(null);
-  const [meta, setMeta] = useState<MatchRow | null>(null);
+  const [meta, setMeta] = useState<MatchRow | null>(initialMeta ?? null);
   const [msgs, setMsgs] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [menu, setMenu] = useState(false);
@@ -121,7 +121,7 @@ export default function ChatPanel({ matchId, onClose }: { matchId: string; onClo
     onClose();
   }
 
-  if (loading || !meta) return <ChatSkeleton />;
+  if (!meta) return <ChatSkeleton />;
 
   return (
     <div

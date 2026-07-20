@@ -1,10 +1,27 @@
-FIX: duplicate style key build error
-====================================
-One file. Removes the duplicate background/border in the preview button.
+CHAT OPENS INSTANTLY (preloaded)
+================================
+The chat now opens already showing the person's name/photo (passed from
+the matches list) instead of re-fetching everything first. So no
+skeleton-then-swap flash when opening a chat -- it's populated immediately,
+only the message bubbles stream in.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\overlayfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\chatinstant\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix duplicate style key"
+   git commit -m "chat opens preloaded"
    git push
+
+FILES
+  components/ChatPanel.tsx            <- REPLACES (accepts preloaded meta)
+  components/tabs_MatchesContent.tsx  <- REPLACES (passes the match data in)
+
+TEST
+- Matches -> tap a chat -> header (name/photo) is there INSTANTLY, no flash.
+  Messages fill in right after.
+
+NOTE ON PREVIEW: profile preview still fetches its full data when opened,
+so it shows a brief card-shaped placeholder first. It's not blank, but if
+that brief placeholder still bugs you, tell me and I'll preload it from the
+profile tab the same way (a bit more wiring since preview builds a full
+card).

@@ -17,7 +17,7 @@ export default function MatchesContent() {
   const [meId, setMeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sheetFor, setSheetFor] = useState<MatchRow | null>(null);
-  const [openChatId, setOpenChatId] = useState<string | null>(null);
+  const [openChat, setOpenChat] = useState<MatchRow | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -113,7 +113,7 @@ export default function MatchesContent() {
             {fresh.map((r) => (
               <button
                 key={r.match_id}
-                onClick={() => setOpenChatId(r.match_id)}
+                onClick={() => setOpenChat(r)}
                 style={{
                   border: "none",
                   background: "none",
@@ -161,15 +161,15 @@ export default function MatchesContent() {
               key={r.match_id}
               r={r}
               meId={meId}
-              onOpen={() => setOpenChatId(r.match_id)}
+              onOpen={() => setOpenChat(r)}
               onLong={() => setSheetFor(r)}
             />
           ))}
         </>
       )}
-      {openChatId && (
+      {openChat && (
         <div data-slidein style={{ position: "fixed", inset: 0, zIndex: 80, background: "#fff", maxWidth: 430, margin: "0 auto" }}>
-          <ChatPanel matchId={openChatId} onClose={() => setOpenChatId(null)} />
+          <ChatPanel matchId={openChat.match_id} initialMeta={openChat} onClose={() => setOpenChat(null)} />
         </div>
       )}
 
