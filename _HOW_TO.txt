@@ -1,20 +1,28 @@
-FIX: after entering code it bounces to login instead of your account
-====================================================================
-One file. The redirect fired before the session cookie was ready, so the
-next page saw "not logged in" and bounced to /login. Now it waits for the
-session, picks the right destination, and does a hard navigation so the
-login state is fully in place.
+SETTINGS SLIDES IN (no more blank flash)
+========================================
+Settings now slides in from the right as an overlay instead of navigating
+to a separate page -- so no route change, no blank flash. Opens and closes
+instantly.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\redirectfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+No migration.
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\settingsslide\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix post-login redirect"
+   git commit -m "settings slides in as overlay"
    git push
 
-FILE
-  app/login/page.tsx   <- REPLACES
+FILES
+  components/SettingsPanel.tsx        <- NEW (settings as a panel, was the page)
+  components/tabs_ProfileContent.tsx  <- REPLACES (gear opens the slide-in)
+  app/globals.css                    <- REPLACES (slide-in animation)
+
+NOTE: the old /settings route still exists as a fallback, but the gear
+icon now opens the smooth overlay instead.
 
 TEST
-- Enter email -> code -> should land straight in your account (deck for
-  existing users, onboarding for new ones). No bounce to login.
+- Profile -> gear icon -> settings slides in from the right, instant.
+- Back arrow -> slides away, no blank flash.
+- Everything inside settings (pause, blocked users, change email, delete,
+  sign out) works the same.

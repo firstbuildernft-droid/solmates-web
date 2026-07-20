@@ -9,6 +9,7 @@ import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
 import PhotoGrid, { type Photo } from "@/components/PhotoGrid";
 import { HeightPicker, WeightPicker } from "@/components/Pickers";
 import MapPopup from "@/components/MapPopup";
+import SettingsPanel from "@/components/SettingsPanel";
 import PromptEditor from "@/components/PromptEditor";
 import { ProfileSkeleton } from "@/components/Skeletons";
 import { getMyLocation } from "@/lib/location";
@@ -26,6 +27,7 @@ export default function ProfileContent() {
   const [showHeight, setShowHeight] = useState(false);
   const [showWeight, setShowWeight] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [heightUnit, setHeightUnit] = useState<"cm" | "ft">("cm");
   const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
   const [myLat, setMyLat] = useState<number | null>(null);
@@ -141,9 +143,9 @@ export default function ProfileContent() {
           <h1 style={{ fontWeight: 900, fontSize: 26, color: INK, letterSpacing: -0.5, margin: 0 }}>
             My profile
           </h1>
-          <Link href="/settings" aria-label="Settings" style={{ display: "flex", color: MUTE, padding: 4 }}>
+          <button onClick={() => setShowSettings(true)} aria-label="Settings" style={{ display: "flex", color: MUTE, padding: 4, background: "none", border: "none", cursor: "pointer" }}>
             <Settings size={23} />
-          </Link>
+          </button>
         </div>
 
         <Link
@@ -412,6 +414,11 @@ export default function ProfileContent() {
         )}
         {showMap && (
           <MapPopup lat={myLat} lng={myLng} city={city} onClose={() => setShowMap(false)} />
+        )}
+        {showSettings && (
+          <div data-slidein style={{ position: "fixed", inset: 0, zIndex: 80, background: "#fff", overflowY: "auto", maxWidth: 430, margin: "0 auto" }}>
+            <SettingsPanel onClose={() => setShowSettings(false)} />
+          </div>
         )}
       </div>
     </main>

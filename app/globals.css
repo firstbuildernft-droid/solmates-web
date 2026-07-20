@@ -152,3 +152,13 @@ html {
   scrollbar-gutter: stable;
   overflow-y: scroll;
 }
+
+/* Settings slides in from the right, over the profile. No route change,
+   so no blank flash. */
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+[data-slidein] {
+  animation: slideInRight .26s cubic-bezier(.22,1,.36,1);
+}
