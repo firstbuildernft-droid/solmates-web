@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { weeklyActivity } from "@/lib/activity";
+import { allUsers } from "@/lib/allUsers";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
 import PayoutRow from "./PayoutRow";
 
@@ -14,6 +15,7 @@ export default async function AdminPage() {
   if (!user) notFound();
 
   const { week, rows } = await weeklyActivity();
+  const users = await allUsers();
 
   const admin = createAdminClient();
   const { data: verified } = await admin
@@ -202,9 +204,59 @@ export default async function AdminPage() {
           </table>
         </div>
       )}
+
+      <H2>All users ({users.length})</H2>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, whiteSpace: "nowrap" }}>
+          <thead>
+            <tr style={{ textAlign: "left", color: MUTE, borderBottom: "1px solid rgba(11,31,18,.1)" }}>
+              <th style={th}>Name</th>
+              <th style={th}>Gender</th>
+              <th style={th}>Age</th>
+              <th style={th}>City</th>
+              <th style={th}>Joined</th>
+              <th style={th}>Face</th>
+              <th style={th}>Wallet</th>
+              <th style={th}>SOL</th>
+              <th style={th}>Photos</th>
+              <th style={th}>Likes given</th>
+              <th style={th}>Likes recv</th>
+              <th style={th}>Matches</th>
+              <th style={th}>Msgs</th>
+              <th style={th}>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id} style={{ borderBottom: "1px solid rgba(11,31,18,.05)" }}>
+                <td style={{ ...td, fontWeight: 700 }}>
+                  {u.name}
+                  {!u.onboarded && <span style={{ color: MUTE, fontWeight: 500 }}> (incomplete)</span>}
+                </td>
+                <td style={td}>{u.gender ?? "—"}</td>
+                <td style={td}>{u.age ?? "—"}</td>
+                <td style={td}>{u.city ?? "—"}</td>
+                <td style={td}>{u.joined ? new Date(u.joined).toLocaleDateString() : "—"}</td>
+                <td style={td}>{u.faceVerified ? "✓" : "—"}</td>
+                <td style={td}>{u.walletVerified ? "✓" : "—"}</td>
+                <td style={td}>{u.sol != null ? u.sol.toFixed(2) : "—"}</td>
+                <td style={td}>{u.photos}</td>
+                <td style={td}>{u.likesGiven}</td>
+                <td style={td}>{u.likesReceived}</td>
+                <td style={td}>{u.matches}</td>
+                <td style={td}>{u.messagesSent}</td>
+                <td style={{ ...td, fontWeight: 900, color: GREEN_DK }}>{u.score}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </main>
   );
 }
+
+const th: React.CSSProperties = { padding: "8px 10px", fontWeight: 700 };
+const td: React.CSSProperties = { padding: "8px 10px", color: INK };
 
 function H2({ children }: { children: React.ReactNode }) {
   return (
