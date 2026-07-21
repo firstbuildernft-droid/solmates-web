@@ -1,33 +1,30 @@
-ADMIN: all-users list with data + activity score
-=================================================
-Adds a full user list to your existing /admin panel: everyone signed up,
-their profile data, and an activity score. No migration.
+WOMEN VERIFY WALLETS + FULL ADDRESSES IN ADMIN
+==============================================
+1. Everyone now sees the Verify tab (women verify with 0.1 SOL, same as men).
+2. Admin panel (/bananas) now shows each user's FULL wallet address as a
+   click-to-copy button, for sending payouts.
 
-SECURITY: the admin panel is already locked to your account (ADMIN_EMAILS)
-and returns 404 to anyone else -- that's stronger than a password. Make
-sure your email is in the ADMIN_EMAILS env var in Vercel (it already is if
-/admin works for you now).
+No migration.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\adminusers\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\womenwallet\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "admin all-users list"
+   git commit -m "women verify wallets, full address in admin"
    git push
 
 FILES
-  lib/allUsers.ts        <- NEW (pulls all users + activity)
-  app/admin/page.tsx     <- REPLACES (adds the users table)
-
-WHAT YOU GET (visit /admin)
-A table of every signed-up user, sorted by activity score, showing:
-name, gender, age, city, join date, face-verified, wallet-verified, SOL
-balance, photo count, likes given, likes received, matches, messages, and
-a score. Users who haven't finished onboarding show "(incomplete)".
-
-The score = likesGiven + likesReceived + matches*4 + messages*2. Tune the
-weights in lib/allUsers.ts if you want.
+  components/TabShell.tsx   <- REPLACES (Verify tab shown to everyone)
+  lib/allUsers.ts          <- REPLACES (includes wallet address)
+  app/bananas/page.tsx     <- REPLACES (wallet column)
+  app/bananas/CopyAddr.tsx <- NEW (click-to-copy address)
 
 TEST
-- Go to thesolmates.com/admin -> scroll to "All users" -> the table lists
-  everyone. (You must be logged in as your admin email; others get 404.)
+- Log in as a woman (or a woman test account) -> the Verify tab now shows
+  -> can paste a wallet + send 0.1 SOL to verify, same flow as men.
+- /bananas -> All users -> Wallet column shows the full address; click it
+  -> "Copied!" -> paste into your wallet to send a payout.
+
+NOTE: women verifying is the SAME paid flow as men (0.1 SOL). If you ever
+want women's to be free (just an address to receive payouts), tell me --
+that's a different, lighter flow.

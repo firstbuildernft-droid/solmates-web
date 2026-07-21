@@ -60,9 +60,7 @@ export default function TabShell({ active }: { active: Tab }) {
   const navTabs: { key: Tab; icon: any; label: string; badge: number }[] = [
     { key: "discover", icon: Flame, label: "Discover", badge: 0 },
     { key: "matches", icon: MessageCircle, label: "Matches", badge: matchesBadge },
-    ...(gender === "man"
-      ? [{ key: "verify" as const, icon: ShieldCheck, label: "Verify", badge: 0 }]
-      : []),
+    { key: "verify" as const, icon: ShieldCheck, label: "Verify", badge: 0 },
     { key: "profile", icon: User, label: "Profile", badge: 0 },
   ];
 
@@ -77,11 +75,9 @@ export default function TabShell({ active }: { active: Tab }) {
       <div style={{ display: tab === "profile" ? "block" : "none", minHeight: "100dvh" }}>
         <ProfileContent />
       </div>
-      {gender === "man" && (
-        <div style={{ display: tab === "verify" ? "block" : "none", minHeight: "100dvh" }}>
-          <VerifyContent />
-        </div>
-      )}
+      <div style={{ display: tab === "verify" ? "block" : "none", minHeight: "100dvh" }}>
+        <VerifyContent />
+      </div>
 
       <nav
         style={{

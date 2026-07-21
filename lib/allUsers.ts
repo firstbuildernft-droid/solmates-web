@@ -18,6 +18,7 @@ export type UserRow = {
   onboarded: boolean;
   faceVerified: boolean;
   walletVerified: boolean;
+  walletAddress: string | null;
   sol: number | null;
   photos: number;
   // activity
@@ -103,6 +104,7 @@ export async function allUsers(): Promise<UserRow[]> {
       onboarded: !!p.onboarded,
       faceVerified: !!p.face_verified,
       walletVerified,
+      walletAddress: w?.address ?? null,
       sol,
       photos: photoCount.get(p.id) ?? 0,
       likesGiven: lg,
