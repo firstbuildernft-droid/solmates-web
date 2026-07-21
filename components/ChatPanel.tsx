@@ -1,5 +1,7 @@
 "use client";
 import { ChatSkeleton } from "@/components/Skeletons";
+import ExpandedProfile from "@/components/ExpandedProfile";
+import type { Candidate } from "@/lib/deck";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -25,6 +27,48 @@ export default function ChatPanel({ matchId, initialMeta, onClose }: { matchId: 
   const [msgs, setMsgs] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [menu, setMenu] = useState(false);
+  const [viewProfile, setViewProfile] = useState<Candidate | null>(null);
+
+  // Load the match's full profile (photos, bio, prompts...) so we can show
+  // the same expanded card they had in the deck — reachable again after
+  // matching, by tapping their name/photo in the chat header.
+  async function openProfile() {
+    if (!meta) return;
+    const supabase = createClient();
+    const other = meta.other_id;
+
+    const [{ data: p }, { data: photos }, { data: trades }, { data: wallet }, { data: qs }] =
+      await Promise.all([
+        supabase.from("profiles").select("*").eq("id", other).maybeSingle(),
+        supabase.from("photos").select("storage_path").eq("user_id", other).order("position"),
+        supabase.from("trades").select("label").eq("user_id", other).order("position"),
+        supabase.from("wallets").select("address, state").eq("user_id", other).maybeSingle(),
+        supabase.from("prompts").select("prompt, answer").eq("user_id", other).order("position"),
+      ]);
+    if (!p) return;
+
+    let sol: number | null = null;
+    const walletOk = wallet?.state === "verified";
+    if (walletOk && wallet?.address) {
+      const { data: bal } = await supabase
+        .from("wallet_balances").select("sol_balance").eq("address", wallet.address).maybeSingle();
+      sol = bal?.sol_balance ?? null;
+    }
+    const age = p.birthdate
+      ? Math.floor((Date.now() - new Date(p.birthdate).getTime()) / 3.15576e10) : 0;
+
+    setViewProfile({
+      id: p.id, display_name: p.display_name, age, city: p.city, bio: p.bio,
+      height_cm: p.height_cm, weight_kg: p.weight_kg, gym: p.gym, drinks: p.drinks, smokes: p.smokes,
+      face_verified: p.face_verified, wallet_address: walletOk ? wallet?.address ?? null : null,
+      wallet_verified: walletOk, sol_balance: sol,
+      photos: (photos ?? []).map((x) => x.storage_path),
+      trades: (trades ?? []).map((t) => t.label),
+      distance_km: null,
+      prompt_qs: (qs ?? []).map((x) => x.prompt),
+      prompt_as: (qs ?? []).map((x) => x.answer),
+    });
+  }
   const [loading, setLoading] = useState(true);
   const [msgsLoaded, setMsgsLoaded] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
@@ -154,31 +198,36 @@ export default function ChatPanel({ matchId, initialMeta, onClose }: { matchId: 
         >
           <ChevronLeft size={24} color={INK} />
         </button>
-        <div
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: "50%",
-            background: meta.other_photo
-              ? `center / cover no-repeat url(${publicUrl(meta.other_photo)})`
-              : "#e8efe9",
-          }}
-        />
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <span style={{ fontWeight: 800, fontSize: 15.5, color: INK }}>
-              {meta.other_name}
-            </span>
-            {meta.other_face_verified && (
-              <ShieldCheck size={14} color={GREEN} strokeWidth={2.8} />
+        <button
+          onClick={openProfile}
+          style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0, fontFamily: font }}
+        >
+          <div
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: "50%",
+              background: meta.other_photo
+                ? `center / cover no-repeat url(${publicUrl(meta.other_photo)})`
+                : "#e8efe9",
+            }}
+          />
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <span style={{ fontWeight: 800, fontSize: 15.5, color: INK }}>
+                {meta.other_name}
+              </span>
+              {meta.other_face_verified && (
+                <ShieldCheck size={14} color={GREEN} strokeWidth={2.8} />
+              )}
+            </div>
+            {meta.other_wallet_ok && meta.other_sol != null && (
+              <div style={{ fontSize: 11.5, color: GREEN_DK, fontWeight: 800 }}>
+                {Number(meta.other_sol).toFixed(2)} SOL · verified
+              </div>
             )}
           </div>
-          {meta.other_wallet_ok && meta.other_sol != null && (
-            <div style={{ fontSize: 11.5, color: GREEN_DK, fontWeight: 800 }}>
-              {Number(meta.other_sol).toFixed(2)} SOL · verified
-            </div>
-          )}
-        </div>
+        </button>
         <button
           onClick={() => setMenu(!menu)}
           style={{ background: "none", border: "none", cursor: "pointer", color: MUTE, padding: 4 }}
@@ -321,6 +370,10 @@ export default function ChatPanel({ matchId, initialMeta, onClose }: { matchId: 
           <Send size={18} />
         </button>
       </div>
+
+      {viewProfile && (
+        <ExpandedProfile p={viewProfile} onClose={() => setViewProfile(null)} />
+      )}
     </div>
   );
 }

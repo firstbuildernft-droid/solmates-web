@@ -41,7 +41,11 @@ export default function PromptEditor({ userId }: { userId: string }) {
       .insert({ user_id: userId, prompt: chosen, answer: answer.trim(), position: prompts.length })
       .select("id, prompt, answer")
       .single();
-    if (!error && data) {
+    if (error) {
+      alert("Couldn't save: " + error.message);
+      return;
+    }
+    if (data) {
       setPrompts([...prompts, data]);
       setChosen(null);
       setAnswer("");

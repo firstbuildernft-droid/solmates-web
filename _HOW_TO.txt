@@ -1,21 +1,30 @@
-FIX: "You matched, say something" flashes in existing chats
-===========================================================
-The empty-state text flashed for a split second when opening a chat that
-already has messages. Now it only appears after messages are actually
-fetched and confirmed empty -- so it never flashes in a real conversation.
+VIEW MATCH PROFILE FROM CHAT + prompt error surfacing
+=====================================================
+Tap a match's name/photo at the top of the chat -> their full profile
+(photos, bio, prompts, everything) opens, same as in the deck. Reachable
+any time after matching.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\nomatch\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+Also: the prompt Add button now shows an error if a save fails (instead
+of silently doing nothing).
+
+No migration (you already created the prompts table).
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\matchprofile\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix matched-flash in existing chats"
+   git commit -m "view match profile from chat"
    git push
 
-FILE
-  components/ChatPanel.tsx   <- REPLACES
+FILES
+  components/ChatPanel.tsx      <- REPLACES (tap header -> full profile)
+  components/PromptEditor.tsx   <- REPLACES (shows save errors)
 
 TEST
-- Open a chat that already has messages -> should go straight to the
-  messages, NO "say something" flash.
-- Open a brand-new match with no messages -> "say something" shows
-  (correctly, after load).
+- Open a chat -> tap the person's name/photo at the top -> their full
+  scrollable profile opens (photos, info, prompts). Close with X.
+
+ON PROMPTS DISPLAY: your prompts already show in the scrollable profile
+that others see (and in your own Preview). On your own PROFILE tab they
+appear as editable cards (that's the editor). If you want them shown as
+read-only display cards on your profile too, tell me.
