@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, X, Star, Sparkles } from "lucide-react";
+import { Heart, X, Star, Sparkles, SlidersHorizontal } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchDeck, swipe, type Candidate } from "@/lib/deck";
 import { refreshLocationIfStale, getMyLocation, captureLocation, ensureCity } from "@/lib/location";
 import { publicUrl } from "@/lib/photos";
 import Card from "@/components/Card";
 import ExpandedProfile from "@/components/ExpandedProfile";
+import FilterSheet from "@/components/FilterSheet";
 import { DeckSkeleton } from "@/components/Skeletons";
 import Logo from "@/components/Logo";
 import { GREEN, GREEN_LT, INK, MUTE, font } from "@/lib/theme";
@@ -23,6 +24,7 @@ export default function DiscoverContent() {
   const [flyOut, setFlyOut] = useState<"left" | "right" | null>(null);
   const [matched, setMatched] = useState<Candidate | null>(null);
   const [expanded, setExpanded] = useState<Candidate | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const startX = useRef(0);
 
   useEffect(() => {
@@ -114,8 +116,16 @@ export default function DiscoverContent() {
         margin: "0 auto",
       }}
     >
-      <div style={{ padding: "12px 18px 8px" }}>
+      <div style={{ padding: "12px 18px 8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Logo size={30} fontSize={21} />
+        <button
+          onClick={() => setShowFilters(true)}
+          aria-label="Filters"
+          data-tap
+          style={{ background: "none", border: "none", cursor: "pointer", color: MUTE, display: "flex", padding: 4 }}
+        >
+          <SlidersHorizontal size={22} />
+        </button>
       </div>
 
       <div
@@ -199,6 +209,17 @@ export default function DiscoverContent() {
             <Heart size={26} strokeWidth={3} fill={GREEN} />
           </ActionBtn>
         </div>
+      )}
+
+      {showFilters && (
+        <FilterSheet
+          onClose={() => setShowFilters(false)}
+          onSaved={async () => {
+            setLoading(true);
+            try { setDeck(await fetchDeck()); } catch {}
+            setLoading(false);
+          }}
+        />
       )}
 
       {expanded && (
