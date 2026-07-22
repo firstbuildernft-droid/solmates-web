@@ -1,47 +1,37 @@
-SEARCH FILTERS (age, distance, SOL balance, verified only)
-==========================================================
+SEARCH FILTERS v2 -- sliders, no typing
+=======================================
+Replaces the number boxes (which clamped as you typed, so you couldn't
+enter anything) with drag sliders.
 
-1. RUN THE MIGRATION FIRST (this one matters -- the filter button will
-   fail without it):
+1. RUN THE MIGRATION if you haven't already:
    Supabase -> SQL Editor -> paste 0012_filters.sql -> Run.
-   Should say "Success. No rows returned."
+   (Safe to run again if you already did -- it's all create-or-replace
+   and "add column if not exists".)
 
 2. Copy + push:
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\filters\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\filters2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "search filters"
+   git commit -m "filter sliders"
    git push
 
 FILES
-  0012_filters.sql                    <- run in Supabase
-  components/FilterSheet.tsx          <- NEW (the filter sheet)
-  components/tabs_DiscoverContent.tsx <- REPLACES (filter button + refetch)
+  0012_filters.sql                    <- run in Supabase (same as before)
+  components/FilterSheet.tsx          <- REPLACES (sliders)
+  components/tabs_DiscoverContent.tsx <- REPLACES (unchanged if you already
+                                          deployed v1 -- included so this
+                                          works standalone)
 
-HOW IT WORKS
-- Discover tab -> slider icon (top right) -> filter sheet slides up.
-- Age: min/max boxes.
-- Maximum distance: 10 / 25 / 50 / 100 / 250 km / Anywhere.
-- Minimum wallet balance: Any / 1 / 5 / 10 / 50 / 100+ SOL.
-- Verified only: wallet-verified OR face-verified.
-- "Done" saves and instantly refetches the deck. "Reset" clears to defaults.
-
-Filters are saved on your profile, so they persist across sessions and
-devices -- not just this visit.
-
-TWO DELIBERATE CHOICES (tell me if you want them changed):
-- People with NO location still show up even with a distance filter set.
-  Otherwise new signups would be invisible until they grant location.
-- Setting a minimum SOL above "Any" implies wallet-verified, since we
-  can't know an unverified wallet's balance.
+WHAT'S DIFFERENT
+- Age: one track, TWO handles. Drag them to set the range. 18 to 70,
+  where 70 means "70 and up". Both at the ends reads "Any".
+- Maximum distance: one handle, 1 to 250 km. All the way right = "Anywhere".
+- Minimum wallet balance: one handle, 0 to 100 SOL. All the way left = "Any".
+- Verified only: still a toggle (it's on/off, nothing to slide).
+- The value shows on the right of each label and updates as you drag.
 
 TEST
-- Open filters, set "Verified only" ON, Done -> deck should only show
-  verified people.
-- Set distance to 10 km -> only nearby people (plus anyone with no
-  location).
-- Reset -> Done -> full deck returns.
-
-IF THE SHEET SAYS "Couldn't save filters" -> the migration didn't run.
+- Discover -> slider icon top right -> drag each handle, watch the number
+  update -> Done -> deck refetches with the filters applied.
