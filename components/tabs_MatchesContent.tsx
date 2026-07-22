@@ -37,7 +37,8 @@ export default function MatchesContent() {
   }, [router]);
 
   async function unmatch(m: MatchRow) {
-    await createClient().rpc("unmatch", { match: m.match_id });
+    const { error } = await createClient().rpc("unmatch", { match: m.match_id });
+    if (error) return alert("Couldn't unmatch: " + error.message);
     setRows((rs) => rs.filter((r) => r.match_id !== m.match_id));
   }
   async function block(m: MatchRow) {
@@ -169,7 +170,15 @@ export default function MatchesContent() {
       )}
       {openChat && (
         <div data-slidein style={{ position: "fixed", inset: 0, zIndex: 80, background: "#fff", maxWidth: 430, margin: "0 auto" }}>
-          <ChatPanel matchId={openChat.match_id} initialMeta={openChat} onClose={() => setOpenChat(null)} />
+          <ChatPanel
+            matchId={openChat.match_id}
+            initialMeta={openChat}
+            onClose={() => setOpenChat(null)}
+            onGone={(id) => {
+              setRows((rs) => rs.filter((r) => r.match_id !== id));
+              setOpenChat(null);
+            }}
+          />
         </div>
       )}
 

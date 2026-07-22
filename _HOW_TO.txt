@@ -1,37 +1,20 @@
-SEARCH FILTERS v2 -- sliders, no typing
-=======================================
-Replaces the number boxes (which clamped as you typed, so you couldn't
-enter anything) with drag sliders.
+FIX: unmatch doesn't remove the person
+======================================
+RUN THE SQL FIRST (in the chat message) -- makes unmatch actually delete
+the match. Then:
 
-1. RUN THE MIGRATION if you haven't already:
-   Supabase -> SQL Editor -> paste 0012_filters.sql -> Run.
-   (Safe to run again if you already did -- it's all create-or-replace
-   and "add column if not exists".)
-
-2. Copy + push:
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\filters2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\unmatchfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "filter sliders"
+   git commit -m "fix unmatch"
    git push
 
 FILES
-  0012_filters.sql                    <- run in Supabase (same as before)
-  components/FilterSheet.tsx          <- REPLACES (sliders)
-  components/tabs_DiscoverContent.tsx <- REPLACES (unchanged if you already
-                                          deployed v1 -- included so this
-                                          works standalone)
+  components/tabs_MatchesContent.tsx
+  components/ChatPanel.tsx
 
-WHAT'S DIFFERENT
-- Age: one track, TWO handles. Drag them to set the range. 18 to 70,
-  where 70 means "70 and up". Both at the ends reads "Any".
-- Maximum distance: one handle, 1 to 250 km. All the way right = "Anywhere".
-- Minimum wallet balance: one handle, 0 to 100 SOL. All the way left = "Any".
-- Verified only: still a toggle (it's on/off, nothing to slide).
-- The value shows on the right of each label and updates as you drag.
-
-TEST
-- Discover -> slider icon top right -> drag each handle, watch the number
-  update -> Done -> deck refetches with the filters applied.
+CHANGES
+- Unmatch errors now show instead of failing silently.
+- Unmatching from inside a chat now removes the row from the list too
+  (before, it only closed the chat).

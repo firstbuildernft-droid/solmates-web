@@ -19,7 +19,7 @@ import {
 import { publicUrl } from "@/lib/photos";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
 
-export default function ChatPanel({ matchId, initialMeta, onClose }: { matchId: string; initialMeta?: MatchRow; onClose: () => void }) {
+export default function ChatPanel({ matchId, initialMeta, onClose, onGone }: { matchId: string; initialMeta?: MatchRow; onClose: () => void; onGone?: (id: string) => void }) {
   const router = useRouter();
 
   const [meId, setMeId] = useState<string | null>(null);
@@ -148,8 +148,10 @@ export default function ChatPanel({ matchId, initialMeta, onClose }: { matchId: 
 
   async function unmatch() {
     if (!meta) return;
-    await createClient().rpc("unmatch", { match: matchId });
-    onClose();
+    const { error } = await createClient().rpc("unmatch", { match: matchId });
+    if (error) return alert("Couldn't unmatch: " + error.message);
+    if (onGone) onGone(matchId);
+    else onClose();
   }
 
   async function report() {
