@@ -148,28 +148,40 @@ function NavBtn({
         transition: "transform .18s cubic-bezier(.22,1.5,.4,1), color .2s ease",
       }}
     >
-      <span style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-        {/* green pill that grows out from behind the icon on tap */}
-        <span
-          aria-hidden
+      <span
+        style={{
+          position: "relative",
+          display: "inline-flex",
+          width: 21,
+          height: 21,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {/* A solid copy of the SAME icon sits underneath and fades in on
+            tap, so the green lands inside the icon's own shape rather
+            than behind it as a generic blob. */}
+        <Icon
+          size={21}
+          strokeWidth={active ? 2.6 : 2}
+          fill={GREEN}
+          stroke={GREEN}
           style={{
             position: "absolute",
-            left: "50%",
-            top: "50%",
-            width: 46,
-            height: 30,
-            marginLeft: -23,
-            marginTop: -15,
-            borderRadius: 999,
-            background: "rgba(34,197,94,.22)",
-            transform: fill ? "scale(1)" : "scale(0)",
+            inset: 0,
             opacity: fill ? 1 : 0,
+            transform: fill ? "scale(1)" : "scale(.55)",
+            transformOrigin: "50% 50%",
             transition: fill
-              ? "transform .3s cubic-bezier(.22,1,.36,1), opacity .12s ease"
-              : "transform .22s ease, opacity .22s ease",
+              ? "opacity .1s ease, transform .3s cubic-bezier(.22,1,.36,1)"
+              : "opacity .25s ease, transform .25s ease",
           }}
         />
-        <Icon size={21} strokeWidth={active ? 2.6 : 2} style={{ position: "relative" }} />
+        <Icon
+          size={21}
+          strokeWidth={active ? 2.6 : 2}
+          style={{ position: "relative" }}
+        />
         {badge > 0 && (
           <span style={{
             position: "absolute", top: -6, right: -9, background: "#ef4444",

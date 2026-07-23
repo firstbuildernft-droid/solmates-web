@@ -1,22 +1,24 @@
-BOTTOM NAV BUTTON ANIMATIONS
-============================
-Discover / Matches / Verify / Profile. One file, no migration.
+NAV ANIMATION v2 -- fills the icon itself
+=========================================
+v1 grew a green pill behind the icon (same shape for all four). This
+fills each icon's own outline instead: the flame fills like a flame, the
+shield like a shield, and so on.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\navanim\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\navanim2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "nav button animations"
+   git commit -m "nav icons fill on tap"
    git push
 
 FILE
   components/TabShell.tsx
 
-WHAT IT DOES
-- Press: the whole tab shrinks and dips a touch, then springs back.
-- Tap: a green pill grows out from behind the icon, then fades.
-- Unread badges sit above the pill so they stay readable.
+HOW IT WORKS
+A solid green copy of the same icon sits underneath the outline one. On
+tap it scales up from the centre and fades in, so the green appears to
+flood the icon from inside its own shape. Fades back after ~0.34s. The
+press dip and spring-back are unchanged.
 
-The pill is a soft green (22% opacity) so the icon stays visible through
-it. Want it stronger, or the icon flipping white like the swipe buttons?
-Say so.
+Want the fill to STAY on whichever tab you're currently on, instead of
+fading out? That's a small change and it looks good -- just say so.
