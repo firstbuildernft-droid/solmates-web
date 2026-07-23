@@ -1,24 +1,38 @@
-DIAGNOSTIC: why the admin panel 404s
-====================================
-Temporary page. Tells you exactly which check is failing.
+BANANAS -- complete folder + its dependency
+===========================================
+Your admin gate passes (whoami said Match: YES), and the last build
+succeeded (whoami loads). So the only explanation left is the bananas
+route isn't in the repo. This ships all of it.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\whoami\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+STEP 1 -- copy in:
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\bananas2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
+
+STEP 2 -- VERIFY before pushing (this is the step that's been missed):
+   dir "C:\Users\onur1\Documents\solmates-web\app\bananas"
+   Must list 4 files: page.tsx, actions.ts, PayoutRow.tsx, CopyAddr.tsx
+
+   dir "C:\Users\onur1\Documents\solmates-web\lib\allUsers.ts"
+   Must exist.
+
+   If either is missing, STOP and tell me -- don't push.
+
+STEP 3 -- push:
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "admin diagnostic"
+   git commit -m "bananas admin panel"
    git push
 
-THEN VISIT:  thesolmates.com/whoami
-(logged in as the account you want admin on)
+STEP 4 -- confirm it reached GitHub:
+   Open github.com/firstbuildernft-droid/solmates-web
+   Click into app/ -- you should see a "bananas" folder with 4 files.
+   If it's not there, the push didn't include it.
 
-Send me what it says. It prints your email, whether ADMIN_EMAILS exists,
-how many entries it has, and whether they match.
+STEP 5 -- watch Vercel go green, then visit thesolmates.com/bananas
 
-It never prints the allowed list, so it's safe if someone else finds it.
-Still, delete app/whoami once the panel works.
+IF THE BUILD GOES RED: paste me the error. A missing import is the usual
+cause and it's a one-line fix.
 
-ALSO CHECK while you're in Vercel:
-Settings -> Environment Variables -> ADMIN_EMAILS must be ticked for
-PRODUCTION. If it's only ticked for Preview/Development, the live site
-never sees it -- that's the most common cause of exactly this.
+CLEANUP once it works:
+   Remove-Item "C:\Users\onur1\Documents\solmates-web\app\whoami" -Recurse -Force
+   (then commit + push)
