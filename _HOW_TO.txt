@@ -1,24 +1,22 @@
-SWIPE BUTTON ANIMATIONS
-=======================
-One file. No migration.
+BOTTOM NAV BUTTON ANIMATIONS
+============================
+Discover / Matches / Verify / Profile. One file, no migration.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\btnanim\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\navanim\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "swipe button animations"
+   git commit -m "nav button animations"
    git push
 
 FILE
-  components/tabs_DiscoverContent.tsx
+  components/TabShell.tsx
 
 WHAT IT DOES
-- Press: the button shrinks and dips slightly, shadow tightens, then
-  springs back on release.
-- Click: colour floods out from the centre to fill the circle, and the
-  icon flips to white against it. Fades back after ~0.35s.
+- Press: the whole tab shrinks and dips a touch, then springs back.
+- Tap: a green pill grows out from behind the icon, then fades.
+- Unread badges sit above the pill so they stay readable.
 
-ONE CHOICE I MADE
-Each button fills with ITS OWN colour: heart and star green, X red.
-Filling the reject button green looked wrong next to a red X. If you
-want all three green, say so and it's a one-line change.
+The pill is a soft green (22% opacity) so the icon stays visible through
+it. Want it stronger, or the icon flipping white like the swipe buttons?
+Say so.

@@ -87,38 +87,102 @@ export default function TabShell({ active }: { active: Tab }) {
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
-        {navTabs.map(({ key, icon: Icon, label, badge }) => {
-          const isActive = key === tab;
-          return (
-            <button
-              key={key}
-              data-tap
-              onClick={() => go(key as Tab)}
-              style={{
-                flex: 1, background: "none", border: "none", padding: "9px 0 8px",
-                cursor: "pointer", display: "flex", flexDirection: "column",
-                alignItems: "center", gap: 2, color: isActive ? GREEN : MUTE,
-                fontFamily: font, position: "relative",
-              }}
-            >
-              <span style={{ position: "relative", display: "inline-flex" }}>
-                <Icon size={21} strokeWidth={isActive ? 2.6 : 2} />
-                {badge > 0 && (
-                  <span style={{
-                    position: "absolute", top: -6, right: -9, background: "#ef4444",
-                    color: "#fff", fontSize: 10, fontWeight: 900, minWidth: 17, height: 17,
-                    borderRadius: 999, display: "flex", alignItems: "center",
-                    justifyContent: "center", padding: "0 4px", border: "2px solid #fff",
-                  }}>
-                    {badge > 99 ? "99+" : badge}
-                  </span>
-                )}
-              </span>
-              <span style={{ fontSize: 10, fontWeight: isActive ? 800 : 600 }}>{label}</span>
-            </button>
-          );
-        })}
+        {navTabs.map(({ key, icon: Icon, label, badge }) => (
+          <NavBtn
+            key={key}
+            icon={Icon}
+            label={label}
+            badge={badge}
+            active={key === tab}
+            onClick={() => go(key as Tab)}
+          />
+        ))}
       </nav>
     </>
+  );
+}
+
+function NavBtn({
+  icon: Icon,
+  label,
+  badge,
+  active,
+  onClick,
+}: {
+  icon: any;
+  label: string;
+  badge: number;
+  active: boolean;
+  onClick: () => void;
+}) {
+  const [press, setPress] = useState(false);
+  const [fill, setFill] = useState(false);
+
+  function fire() {
+    setFill(true);
+    setTimeout(() => setFill(false), 340);
+    onClick();
+  }
+
+  return (
+    <button
+      onClick={fire}
+      onPointerDown={() => setPress(true)}
+      onPointerUp={() => setPress(false)}
+      onPointerLeave={() => setPress(false)}
+      style={{
+        flex: 1,
+        background: "none",
+        border: "none",
+        padding: "9px 0 8px",
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        color: active ? GREEN : MUTE,
+        fontFamily: font,
+        position: "relative",
+        WebkitTapHighlightColor: "transparent",
+        transform: press ? "scale(.9) translateY(1px)" : "scale(1)",
+        transition: "transform .18s cubic-bezier(.22,1.5,.4,1), color .2s ease",
+      }}
+    >
+      <span style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+        {/* green pill that grows out from behind the icon on tap */}
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            width: 46,
+            height: 30,
+            marginLeft: -23,
+            marginTop: -15,
+            borderRadius: 999,
+            background: "rgba(34,197,94,.22)",
+            transform: fill ? "scale(1)" : "scale(0)",
+            opacity: fill ? 1 : 0,
+            transition: fill
+              ? "transform .3s cubic-bezier(.22,1,.36,1), opacity .12s ease"
+              : "transform .22s ease, opacity .22s ease",
+          }}
+        />
+        <Icon size={21} strokeWidth={active ? 2.6 : 2} style={{ position: "relative" }} />
+        {badge > 0 && (
+          <span style={{
+            position: "absolute", top: -6, right: -9, background: "#ef4444",
+            color: "#fff", fontSize: 10, fontWeight: 900, minWidth: 17, height: 17,
+            borderRadius: 999, display: "flex", alignItems: "center",
+            justifyContent: "center", padding: "0 4px", border: "2px solid #fff",
+            zIndex: 2,
+          }}>
+            {badge > 99 ? "99+" : badge}
+          </span>
+        )}
+      </span>
+      <span style={{ fontSize: 10, fontWeight: active ? 800 : 600, position: "relative" }}>{label}</span>
+    </button>
   );
 }
