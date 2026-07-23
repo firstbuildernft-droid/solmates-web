@@ -1,38 +1,24 @@
-BANANAS -- complete folder + its dependency
-===========================================
-Your admin gate passes (whoami said Match: YES), and the last build
-succeeded (whoami loads). So the only explanation left is the bananas
-route isn't in the repo. This ships all of it.
+SWIPE BUTTON ANIMATIONS
+=======================
+One file. No migration.
 
-STEP 1 -- copy in:
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\bananas2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\btnanim\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
-
-STEP 2 -- VERIFY before pushing (this is the step that's been missed):
-   dir "C:\Users\onur1\Documents\solmates-web\app\bananas"
-   Must list 4 files: page.tsx, actions.ts, PayoutRow.tsx, CopyAddr.tsx
-
-   dir "C:\Users\onur1\Documents\solmates-web\lib\allUsers.ts"
-   Must exist.
-
-   If either is missing, STOP and tell me -- don't push.
-
-STEP 3 -- push:
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "bananas admin panel"
+   git commit -m "swipe button animations"
    git push
 
-STEP 4 -- confirm it reached GitHub:
-   Open github.com/firstbuildernft-droid/solmates-web
-   Click into app/ -- you should see a "bananas" folder with 4 files.
-   If it's not there, the push didn't include it.
+FILE
+  components/tabs_DiscoverContent.tsx
 
-STEP 5 -- watch Vercel go green, then visit thesolmates.com/bananas
+WHAT IT DOES
+- Press: the button shrinks and dips slightly, shadow tightens, then
+  springs back on release.
+- Click: colour floods out from the centre to fill the circle, and the
+  icon flips to white against it. Fades back after ~0.35s.
 
-IF THE BUILD GOES RED: paste me the error. A missing import is the usual
-cause and it's a one-line fix.
-
-CLEANUP once it works:
-   Remove-Item "C:\Users\onur1\Documents\solmates-web\app\whoami" -Recurse -Force
-   (then commit + push)
+ONE CHOICE I MADE
+Each button fills with ITS OWN colour: heart and star green, X red.
+Filling the reject button green looked wrong next to a red X. If you
+want all three green, say so and it's a one-line change.

@@ -203,10 +203,10 @@ export default function DiscoverContent() {
             <X size={28} strokeWidth={3} />
           </ActionBtn>
           <ActionBtn onClick={() => {}} color={GREEN_LT} size={46}>
-            <Star size={20} strokeWidth={2.6} fill={GREEN_LT} />
+            <Star size={20} strokeWidth={2.6} fill="currentColor" />
           </ActionBtn>
           <ActionBtn onClick={() => commit("right")} color={GREEN} size={58}>
-            <Heart size={26} strokeWidth={3} fill={GREEN} />
+            <Heart size={26} strokeWidth={3} fill="currentColor" />
           </ActionBtn>
         </div>
       )}
@@ -309,24 +309,64 @@ function ActionBtn({
   size: number;
   onClick: () => void;
 }) {
+  const [press, setPress] = useState(false);
+  const [fill, setFill] = useState(false);
+
+  function fire() {
+    setFill(true);
+    // Long enough to see the fill land, short enough that rapid swiping
+    // doesn't feel gated by it.
+    setTimeout(() => setFill(false), 360);
+    onClick();
+  }
+
   return (
     <button
-      onClick={onClick}
+      onClick={fire}
+      onPointerDown={() => setPress(true)}
+      onPointerUp={() => setPress(false)}
+      onPointerLeave={() => setPress(false)}
       style={{
+        position: "relative",
+        overflow: "hidden",
         width: size,
         height: size,
         borderRadius: "50%",
         background: "#fff",
         border: `2px solid ${color}`,
-        color,
+        // Icons inherit this, so they go white once the fill covers them.
+        color: fill ? "#fff" : color,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer",
-        boxShadow: "0 4px 14px rgba(11,31,18,.12)",
+        boxShadow: press
+          ? "0 2px 6px rgba(11,31,18,.18)"
+          : "0 4px 14px rgba(11,31,18,.12)",
+        transform: press ? "scale(.86) translateY(2px)" : "scale(1)",
+        // Slight overshoot on release so it springs back rather than
+        // sliding back.
+        transition:
+          "transform .18s cubic-bezier(.22,1.5,.4,1), box-shadow .18s ease, color .2s ease",
+        WebkitTapHighlightColor: "transparent",
       }}
     >
-      {children}
+      {/* the fill: a disc that grows from the centre */}
+      <span
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "50%",
+          background: color,
+          transform: fill ? "scale(1)" : "scale(0)",
+          opacity: fill ? 1 : 0,
+          transition: fill
+            ? "transform .3s cubic-bezier(.22,1,.36,1), opacity .12s ease"
+            : "transform .22s ease, opacity .22s ease",
+        }}
+      />
+      <span style={{ position: "relative", display: "flex" }}>{children}</span>
     </button>
   );
 }
