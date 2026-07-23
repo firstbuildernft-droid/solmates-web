@@ -1,20 +1,24 @@
-FIX: unmatch doesn't remove the person
-======================================
-RUN THE SQL FIRST (in the chat message) -- makes unmatch actually delete
-the match. Then:
+DIAGNOSTIC: why the admin panel 404s
+====================================
+Temporary page. Tells you exactly which check is failing.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\unmatchfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\whoami\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix unmatch"
+   git commit -m "admin diagnostic"
    git push
 
-FILES
-  components/tabs_MatchesContent.tsx
-  components/ChatPanel.tsx
+THEN VISIT:  thesolmates.com/whoami
+(logged in as the account you want admin on)
 
-CHANGES
-- Unmatch errors now show instead of failing silently.
-- Unmatching from inside a chat now removes the row from the list too
-  (before, it only closed the chat).
+Send me what it says. It prints your email, whether ADMIN_EMAILS exists,
+how many entries it has, and whether they match.
+
+It never prints the allowed list, so it's safe if someone else finds it.
+Still, delete app/whoami once the panel works.
+
+ALSO CHECK while you're in Vercel:
+Settings -> Environment Variables -> ADMIN_EMAILS must be ticked for
+PRODUCTION. If it's only ticked for Preview/Development, the live site
+never sees it -- that's the most common cause of exactly this.
