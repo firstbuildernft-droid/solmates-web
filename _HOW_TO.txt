@@ -1,0 +1,18 @@
+FIX: BigInt build error
+=======================
+Your TypeScript target is below ES2020, so BigInt literals (0n) don't
+compile. The base58 encoder now uses plain integer arithmetic instead.
+Same output, no config change needed.
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\walletfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
+   cd C:\Users\onur1\Documents\solmates-web
+   git add .
+   git commit -m "fix bigint build error"
+   git push
+
+FILE
+  lib/wallet.ts   <- REPLACES
+
+Retested: 3000 random encode/decode round-trips pass, a real Solana
+address round-trips exactly, and signatures decode to 64 bytes.

@@ -6,21 +6,31 @@
 
 const B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
+// Byte-array arithmetic rather than BigInt: the build targets below
+// ES2020, where BigInt literals aren't available.
 export function base58Encode(bytes: Uint8Array): string {
-  let n = 0n;
-  for (const b of bytes) n = (n << 8n) | BigInt(b);
+  let zeros = 0;
+  while (zeros < bytes.length && bytes[zeros] === 0) zeros++;
 
+  const digits: number[] = [];
+  for (let i = zeros; i < bytes.length; i++) {
+    let carry = bytes[i];
+    for (let j = 0; j < digits.length; j++) {
+      const x = digits[j] * 256 + carry;
+      digits[j] = x % 58;
+      carry = (x / 58) | 0;
+    }
+    while (carry > 0) {
+      digits.push(carry % 58);
+      carry = (carry / 58) | 0;
+    }
+  }
+
+  // Each leading zero byte is a literal '1'.
   let out = "";
-  while (n > 0n) {
-    out = B58[Number(n % 58n)] + out;
-    n /= 58n;
-  }
-  // Leading zero bytes are '1's.
-  for (const b of bytes) {
-    if (b !== 0) break;
-    out = "1" + out;
-  }
-  return out || "1";
+  for (let i = 0; i < zeros; i++) out += "1";
+  for (let i = digits.length - 1; i >= 0; i--) out += B58[digits[i]];
+  return out;
 }
 
 type Provider = {
