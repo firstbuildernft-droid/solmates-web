@@ -1,18 +1,42 @@
-FIX: BigInt build error
-=======================
-Your TypeScript target is below ES2020, so BigInt literals (0n) don't
-compile. The base58 encoder now uses plain integer arithmetic instead.
-Same output, no config change needed.
+WALLET LOGOS
+============
+The picker now accepts png, svg, webp or jpg, so whatever format your
+files are in will work.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\walletfix\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+STEP 1 -- copy your three logos in, renamed, keeping their extension.
+Paste this whole block into PowerShell:
+
+$dest = "C:\Users\onur1\Documents\solmates-web\public\wallets"
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
+$map = @{ "phantom_logo" = "phantom"; "solflare_logo" = "solflare"; "trust_logo" = "trust" }
+foreach ($k in $map.Keys) {
+  $src = Get-ChildItem "C:\Users\onur1\OneDrive\Masaüstü\$k.*" -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($src) {
+    Copy-Item $src.FullName "$dest\$($map[$k])$($src.Extension)" -Force
+    Write-Host "copied $($map[$k])$($src.Extension)"
+  } else {
+    Write-Host "NOT FOUND: $k"
+  }
+}
+
+It prints what it copied. If any say NOT FOUND, the file isn't on the
+Desktop under that name -- tell me the real name.
+
+STEP 2 -- copy the component + push:
+
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\logos\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix bigint build error"
+   git commit -m "wallet logos"
    git push
 
 FILE
-  lib/wallet.ts   <- REPLACES
+  components/WalletPicker.tsx   <- REPLACES
 
-Retested: 3000 random encode/decode round-trips pass, a real Solana
-address round-trips exactly, and signatures decode to 64 bytes.
+Backpack and Coinbase keep their lettered tiles until you add
+backpack.* and coinbase.* to the same folder. Nothing breaks without them.
+
+TEST
+Verify tab -> Change wallet -> Connect wallet -> Phantom, Solflare and
+Trust show their logos.
