@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { ShieldCheck, Copy, Check, TriangleAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { detectWallets, connectAndSign, isMobile, type Detected } from "@/lib/wallet";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
 
 const DEPOSIT = process.env.NEXT_PUBLIC_DEPOSIT_ADDRESS!;
@@ -13,6 +14,8 @@ type State = "unverified" | "pending" | "verified";
 
 export default function VerifyContent() {
   const [state, setState] = useState<State>("unverified");
+  const [wallets, setWallets] = useState<Detected[]>([]);
+  const [signing, setSigning] = useState(false);
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -38,6 +41,47 @@ export default function VerifyContent() {
       setLoading(false);
     })();
   }, []);
+
+  useEffect(() => {
+    setWallets(detectWallets());
+  }, []);
+
+  // Connect a wallet and prove ownership by signing a message. No payment,
+  // no transaction, and the private key never leaves the wallet.
+  async function signVerify(w: Detected) {
+    setSigning(true);
+    setNote(null);
+    try {
+      const { address: addr, signature } = await connectAndSign(w.provider, async (a) => {
+        const res = await fetch("/api/wallet/connect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address: a }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Couldn't start verification.");
+        return json.message as string;
+      });
+
+      const res = await fetch("/api/wallet/signature", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signature }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Verification failed.");
+
+      setAddress(addr);
+      setState("verified");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Something went wrong.";
+      // Wallets throw this when the user closes the prompt; not an error
+      // worth shouting about.
+      setNote(/reject|denied|cancel/i.test(msg) ? null : msg);
+    } finally {
+      setSigning(false);
+    }
+  }
 
   async function claim() {
     setBusy(true);
@@ -139,10 +183,54 @@ export default function VerifyContent() {
           </div>
         ) : state === "unverified" ? (
           <>
-            <p style={{ color: MUTE, fontSize: 14.5, lineHeight: 1.5, marginBottom: 20 }}>
-              Paste the wallet you want on your profile. Next you'll send{" "}
-              <b style={{ color: INK }}>{AMOUNT} SOL</b> from it — that's what
-              proves it's yours.
+            <p style={{ color: MUTE, fontSize: 14.5, lineHeight: 1.5, marginBottom: 16 }}>
+              Show your holdings on your profile. Connect a wallet and sign a
+              message to prove it's yours. Nothing is sent and no funds move.
+            </p>
+
+            {wallets.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+                {wallets.map((w) => (
+                  <button
+                    key={w.name}
+                    onClick={() => signVerify(w)}
+                    disabled={signing}
+                    style={{
+                      width: "100%",
+                      background: GREEN,
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: 999,
+                      padding: 14,
+                      fontWeight: 800,
+                      fontSize: 15,
+                      fontFamily: font,
+                      cursor: signing ? "default" : "pointer",
+                      opacity: signing ? 0.6 : 1,
+                    }}
+                  >
+                    {signing ? "Waiting for your wallet…" : `Connect ${w.name}`}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div style={{ background: "rgba(11,31,18,.03)", borderRadius: 12, padding: "13px 15px", marginBottom: 20, fontSize: 13, color: MUTE, lineHeight: 1.5 }}>
+                {isMobile()
+                  ? "No wallet detected. Open thesolmates.com inside your wallet app's browser (Phantom, Solflare) and this will work — or use the manual option below."
+                  : "No wallet extension detected. Install Phantom or Solflare, or use the manual option below."}
+              </div>
+            )}
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 0 16px" }}>
+              <span style={{ flex: 1, height: 1, background: "rgba(11,31,18,.1)" }} />
+              <span style={{ fontSize: 11.5, fontWeight: 800, color: MUTE }}>OR</span>
+              <span style={{ flex: 1, height: 1, background: "rgba(11,31,18,.1)" }} />
+            </div>
+
+            <p style={{ color: MUTE, fontSize: 13.5, lineHeight: 1.5, marginBottom: 12 }}>
+              Works with any wallet, including hardware. Paste the address, then
+              send <b style={{ color: INK }}>{AMOUNT} SOL</b> from it to prove
+              it's yours.
             </p>
 
             <input
@@ -245,7 +333,7 @@ export default function VerifyContent() {
               <TriangleAlert size={17} color="#a16207" style={{ flexShrink: 0, marginTop: 1 }} />
               <div style={{ fontSize: 12.5, color: "#713f12", lineHeight: 1.45 }}>
                 Send from your own wallet, not from Binance or another
-                exchange. Exchanges send from their address, not yours — we
+                exchange. Exchanges send from their address, not yours, so we
                 won't be able to match it to you, and the SOL is gone.
               </div>
             </div>

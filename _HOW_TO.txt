@@ -1,24 +1,53 @@
-NAV ANIMATION v2 -- fills the icon itself
-=========================================
-v1 grew a green pill behind the icon (same shape for all four). This
-fills each icon's own outline instead: the flame fills like a flame, the
-shield like a shield, and so on.
+WALLET VERIFICATION BY SIGNATURE (non-custodial)
+================================================
+Connect a wallet, sign a message, verified. No payment, no transaction,
+no private keys. The 0.1 SOL flow stays as the fallback for wallets that
+can't connect (hardware, or mobile browsers where connect fails).
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\navanim2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+1. RUN THE MIGRATION:
+   Supabase -> SQL Editor -> paste 0013_wallet_signature.sql -> Run.
+   (You already ran the verified_via column separately.)
+
+2. Copy + push:
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\walletsign\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
+   Remove-Item "C:\Users\onur1\Documents\solmates-web\0013_wallet_signature.sql" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "nav icons fill on tap"
+   git commit -m "wallet verification by signature"
    git push
 
-FILE
-  components/TabShell.tsx
+FILES
+  0013_wallet_signature.sql            <- run in Supabase, don't copy to repo
+  lib/siws.ts                          <- NEW  signature checking (server)
+  lib/wallet.ts                        <- NEW  wallet detect + sign (client)
+  app/api/wallet/connect/route.ts      <- NEW  issues the one-time nonce
+  app/api/wallet/signature/route.ts    <- NEW  verifies and marks verified
+  components/tabs_VerifyContent.tsx    <- REPLACES  connect buttons + fallback
 
-HOW IT WORKS
-A solid green copy of the same icon sits underneath the outline one. On
-tap it scales up from the centre and fades in, so the green appears to
-flood the icon from inside its own shape. Fades back after ~0.34s. The
-press dip and spring-back are unchanged.
+NO NEW PACKAGES. Signature checking uses Node's built-in crypto, so
+there's nothing to install and nothing extra to keep patched.
 
-Want the fill to STAY on whichever tab you're currently on, instead of
-fading out? That's a small change and it looks good -- just say so.
+WHAT THE USER SEES
+Verify tab -> "Connect Phantom" (or Solflare/Backpack/Coinbase, whichever
+is installed) -> wallet opens showing a plain message that says it proves
+ownership and moves no funds -> approve -> verified, balance on the card.
+Below that, an OR divider and the old paste-address + 0.1 SOL flow.
+
+MOBILE
+If no wallet is detected it tells them to open thesolmates.com inside
+their wallet app's browser, which is the reliable path on phones.
+
+WHAT REACHES YOUR SERVER
+A public address and a signature. That's all. No key, no seed phrase, no
+ability to move anything.
+
+DATABASE
+wallets.verified_via is 'signature' or 'payment', so you can tell the two
+apart in the admin panel and enforce different rules per platform later.
+
+TEST
+- Verify tab -> Connect -> approve in wallet -> "Wallet verified" with
+  your balance.
+- Try it with a wallet already linked to another account -> should say so.
+- Cancel the wallet prompt -> nothing happens, no error shouted at you.
