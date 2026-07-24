@@ -135,7 +135,7 @@ export default function ProfileContent() {
         minHeight: "100vh",
         padding: "32px 20px 60px",
         fontFamily: font,
-        background: "#fff",
+        background: "transparent",
         display: "flex",
         justifyContent: "center",
       }}
@@ -360,7 +360,7 @@ export default function ProfileContent() {
           ))}
         </div>
         <div style={{ fontSize: 12, color: MUTE, marginTop: 8 }}>
-          Typed in by you, so treat them as talk — nothing here is checked
+          Typed in by you, so treat them as talk. Nothing here is checked
           against the chain.
         </div>
 

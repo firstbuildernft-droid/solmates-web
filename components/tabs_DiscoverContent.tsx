@@ -111,7 +111,7 @@ export default function DiscoverContent() {
         display: "flex",
         flexDirection: "column",
         fontFamily: font,
-        background: "#fff",
+        background: "transparent",
         maxWidth: 430,
         margin: "0 auto",
       }}

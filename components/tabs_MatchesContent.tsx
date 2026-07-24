@@ -63,7 +63,7 @@ export default function MatchesContent() {
       style={{
         minHeight: "100dvh",
         fontFamily: font,
-        background: "#fff",
+        background: "transparent",
         maxWidth: 430,
         margin: "0 auto",
         padding: "14px 0 40px",
@@ -95,7 +95,7 @@ export default function MatchesContent() {
             No matches yet
           </div>
           <div style={{ fontSize: 13, marginTop: 5 }}>
-            Keep swiping — they show up here the moment it&apos;s mutual.
+            Keep swiping. They show up here the moment it&apos;s mutual.
           </div>
         </div>
       )}

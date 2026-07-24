@@ -1,21 +1,38 @@
-REMOVE SCROLLBARS
-=================
-One file.
+GREEN TEXTURED BACKGROUND
+=========================
+No migration.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\noscroll\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\greenbg\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "hide scrollbars"
+   git commit -m "green textured background"
    git push
 
-FILE
-  app/globals.css   <- REPLACES
+FILES
+  app/globals.css                     <- REPLACES (the backdrop)
+  components/tabs_DiscoverContent.tsx <- REPLACES )
+  components/tabs_MatchesContent.tsx  <- REPLACES ) these four just drop
+  components/tabs_ProfileContent.tsx  <- REPLACES ) their white background
+  components/tabs_VerifyContent.tsx   <- REPLACES ) so it shows through
 
-Scrollbars are hidden everywhere, in the settings panel and the rest of
-the app. Scrolling works exactly as before -- wheel, trackpad, touch,
-keyboard. Only the bar is gone.
+WHAT IT LOOKS LIKE
+A soft green wash pooling at the top-left and bottom-right, fading to
+white through the middle, with a fine grain over it. Cards, the nav bar
+and the slide-in panels stay solid white, so they read as surfaces
+sitting on the tint rather than everything going green.
 
-Side benefit: the earlier tab-tilt fix relied on always reserving space
-for a scrollbar. With no scrollbar to appear or disappear, there's
-nothing left that can shift the layout.
+The grain is a generated SVG, not an image file, so there's nothing extra
+to download and it stays sharp on any screen.
+
+TUNING IT YOURSELF
+All of it is one block at the bottom of app/globals.css, in body::before.
+
+  Too green?      lower 0.16 / 0.12 / 0.07 in the gradients
+  Not green enough? raise them (0.24 / 0.18 / 0.11 is clearly visible)
+  Too grainy?     lower opacity='0.16' in the SVG
+  Grain too fine? lower baseFrequency='0.8' to about 0.5
+  Hate it?        delete the whole body::before block; the four component
+                  files can stay, they'll just show white again
+
+Tell me which direction and I'll adjust it.

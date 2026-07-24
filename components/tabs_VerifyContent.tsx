@@ -121,7 +121,7 @@ export default function VerifyContent() {
         minHeight: "100vh",
         padding: "32px 20px 60px",
         fontFamily: font,
-        background: "#fff",
+        background: "transparent",
         display: "flex",
         justifyContent: "center",
       }}
