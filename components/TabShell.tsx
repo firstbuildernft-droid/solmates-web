@@ -82,7 +82,12 @@ export default function TabShell({ active }: { active: Tab }) {
       <nav
         style={{
           position: "fixed", bottom: 0, left: 0, right: 0, display: "flex",
-          background: "#fff", borderTop: "1px solid rgba(11,31,18,.08)",
+          // Translucent with a blur, so the tinted backdrop continues
+          // behind the bar rather than stopping at a hard white edge.
+          background: "rgba(255,255,255,.72)",
+          backdropFilter: "blur(20px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+          borderTop: "1px solid rgba(11,31,18,.06)",
           maxWidth: 430, margin: "0 auto", zIndex: 30,
           paddingBottom: "env(safe-area-inset-bottom)",
         }}

@@ -1,30 +1,30 @@
-GREEN BACKGROUND -- app column only
-===================================
-One file.
+SOFTEN THE NAV EDGE
+===================
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\greenbg3\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\softnav\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "green background inside app column"
+   git commit -m "frosted nav, feathered edges"
    git push
 
-FILE
-  app/globals.css   <- REPLACES
+FILES
+  components/TabShell.tsx   <- REPLACES (nav is now frosted glass)
+  app/globals.css          <- REPLACES (column edges feathered)
 
 WHAT CHANGED
-The tint is now a fixed 430px-wide strip down the middle -- the same width
-your screens use -- instead of covering the whole page. On a desktop
-browser the app reads as a phone sitting on a plain white surface. On an
-actual phone it fills the screen, so nothing looks different there.
+The line was there because the nav is a solid white bar and the tint
+stopped dead at it. The nav is now translucent with a blur behind it, so
+the tint carries through the bar instead of ending at it. Same trick iOS
+uses for its tab bar.
+
+Also feathered the left and right edges of the tinted column, so on a wide
+screen it fades out instead of ending on a ruled vertical line.
 
 Hard-refresh (Ctrl+Shift+R) after deploy.
 
-TUNING -- bottom of app/globals.css, body::before
-  column width  -> max-width: 430px
-  too green     -> lower 0.18 / 0.14 / 0.08
-  not enough    -> raise toward 0.26 / 0.20 / 0.12
-  too grainy    -> lower opacity='0.16'
-
-If you want the app column edge visible on desktop -- a hairline border or
-a soft shadow down each side -- say so, it's two lines.
+IF YOU'D RATHER IT WERE OPAQUE
+In TabShell.tsx the nav style now has:
+  background: "rgba(255,255,255,.72)"
+Raise .72 toward .9 for a more solid bar, or back to "#fff" and drop the
+two backdropFilter lines to undo it entirely.

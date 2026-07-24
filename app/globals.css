@@ -214,4 +214,20 @@ body::before {
     linear-gradient(178deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.02) 46%, rgba(255, 255, 255, 0) 100%);
   background-size: 150px 150px, cover, cover, cover;
   background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+  /* Feather the vertical edges, otherwise the strip stops on a ruled line
+     against the white page on a wide screen. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 7%,
+    #000 93%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 7%,
+    #000 93%,
+    transparent 100%
+  );
 }
