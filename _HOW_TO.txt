@@ -1,18 +1,23 @@
-BOTTOM TABS BLEND IN
-====================
-No white bar, no border, no blur. The tabs now sit directly on the
-background, so there's no edge where the bar starts.
+GREEN BACKGROUND -- back to crisp
+=================================
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\navblend\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\greenbg4\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "blend bottom tabs"
+   git commit -m "crisp green background"
    git push
 
 FILE
-  components/TabShell.tsx   <- REPLACES
+  app/globals.css   <- REPLACES
 
-IF YOU ALSO WANT THE TINT GONE
-Open app/globals.css and delete the whole body::before block at the
-bottom. That returns the app to plain white with the tabs still blending.
+The soft fade I'd put on the left and right edges is gone -- that was the
+blurry look. The green is back to how it was when you first saw it, still
+inside the app column, with clean edges.
+
+Hard-refresh (Ctrl+Shift+R) after deploy.
+
+STILL LOOKS SOFT?
+Then it's the grain, not the edges. In the url(...) line change
+opacity='0.16' to '0' and the texture disappears while the green stays.
+Tell me and I'll do it.
