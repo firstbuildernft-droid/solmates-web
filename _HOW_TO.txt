@@ -1,30 +1,16 @@
-SOFTEN THE NAV EDGE
-===================
+REVERT: solid nav bar again
+===========================
+The blur is gone. Bottom bar is plain white as it was.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\softnav\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\navrevert\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "frosted nav, feathered edges"
+   git commit -m "revert frosted nav"
    git push
 
-FILES
-  components/TabShell.tsx   <- REPLACES (nav is now frosted glass)
-  app/globals.css          <- REPLACES (column edges feathered)
+FILE
+  components/TabShell.tsx   <- REPLACES
 
-WHAT CHANGED
-The line was there because the nav is a solid white bar and the tint
-stopped dead at it. The nav is now translucent with a blur behind it, so
-the tint carries through the bar instead of ending at it. Same trick iOS
-uses for its tab bar.
-
-Also feathered the left and right edges of the tinted column, so on a wide
-screen it fades out instead of ending on a ruled vertical line.
-
-Hard-refresh (Ctrl+Shift+R) after deploy.
-
-IF YOU'D RATHER IT WERE OPAQUE
-In TabShell.tsx the nav style now has:
-  background: "rgba(255,255,255,.72)"
-Raise .72 toward .9 for a more solid bar, or back to "#fff" and drop the
-two backdropFilter lines to undo it entirely.
+Everything else stays: the tint, the feathered column edges, the header
+spacing. Only the bottom bar changed back.
