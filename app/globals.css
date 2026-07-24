@@ -162,3 +162,16 @@ html {
 [data-slidein] {
   animation: slideInRight .18s cubic-bezier(.22,1,.36,1);
 }
+
+/* Hide scrollbars app-wide. This is a phone-shaped column, and a chunky
+   desktop scrollbar sitting inside the slide-in panels looks wrong and
+   eats width. Scrolling itself is untouched, and with no scrollbar to
+   appear or vanish there's nothing left to shift the layout sideways. */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}

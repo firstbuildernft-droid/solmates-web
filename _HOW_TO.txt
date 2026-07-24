@@ -1,27 +1,21 @@
-FIX: walletOptions not exported
-===============================
-The picker and Verify tab got updated but lib/wallet.ts didn't, so it was
-still the older version that exports detectWallets instead of
-walletOptions. All three files are here together.
+REMOVE SCROLLBARS
+=================
+One file.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\picker_full\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\noscroll\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
-
-VERIFY before pushing -- this should print walletOptions:
-   Select-String -Path "C:\Users\onur1\Documents\solmates-web\lib\wallet.ts" -Pattern "walletOptions"
-
-If it prints nothing, the copy didn't land. Stop and say so.
-
-Then:
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "wallet picker files"
+   git commit -m "hide scrollbars"
    git push
 
-FILES
-  lib/wallet.ts                     <- REPLACES (the missing piece)
-  components/WalletPicker.tsx       <- picker, logos in any format
-  components/tabs_VerifyContent.tsx <- single Connect wallet button
+FILE
+  app/globals.css   <- REPLACES
 
-Your logo copy step is unaffected -- if you already ran it, the files are
-in public\wallets\ and will just start showing.
+Scrollbars are hidden everywhere, in the settings panel and the rest of
+the app. Scrolling works exactly as before -- wheel, trackpad, touch,
+keyboard. Only the bar is gone.
+
+Side benefit: the earlier tab-tilt fix relied on always reserving space
+for a scrollbar. With no scrollbar to appear or disappear, there's
+nothing left that can shift the layout.
