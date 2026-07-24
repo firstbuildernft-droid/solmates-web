@@ -1,42 +1,27 @@
-WALLET LOGOS
-============
-The picker now accepts png, svg, webp or jpg, so whatever format your
-files are in will work.
+FIX: walletOptions not exported
+===============================
+The picker and Verify tab got updated but lib/wallet.ts didn't, so it was
+still the older version that exports detectWallets instead of
+walletOptions. All three files are here together.
 
-STEP 1 -- copy your three logos in, renamed, keeping their extension.
-Paste this whole block into PowerShell:
-
-$dest = "C:\Users\onur1\Documents\solmates-web\public\wallets"
-New-Item -ItemType Directory -Force -Path $dest | Out-Null
-$map = @{ "phantom_logo" = "phantom"; "solflare_logo" = "solflare"; "trust_logo" = "trust" }
-foreach ($k in $map.Keys) {
-  $src = Get-ChildItem "C:\Users\onur1\OneDrive\Masaüstü\$k.*" -ErrorAction SilentlyContinue | Select-Object -First 1
-  if ($src) {
-    Copy-Item $src.FullName "$dest\$($map[$k])$($src.Extension)" -Force
-    Write-Host "copied $($map[$k])$($src.Extension)"
-  } else {
-    Write-Host "NOT FOUND: $k"
-  }
-}
-
-It prints what it copied. If any say NOT FOUND, the file isn't on the
-Desktop under that name -- tell me the real name.
-
-STEP 2 -- copy the component + push:
-
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\logos\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\picker_full\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
+
+VERIFY before pushing -- this should print walletOptions:
+   Select-String -Path "C:\Users\onur1\Documents\solmates-web\lib\wallet.ts" -Pattern "walletOptions"
+
+If it prints nothing, the copy didn't land. Stop and say so.
+
+Then:
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "wallet logos"
+   git commit -m "wallet picker files"
    git push
 
-FILE
-  components/WalletPicker.tsx   <- REPLACES
+FILES
+  lib/wallet.ts                     <- REPLACES (the missing piece)
+  components/WalletPicker.tsx       <- picker, logos in any format
+  components/tabs_VerifyContent.tsx <- single Connect wallet button
 
-Backpack and Coinbase keep their lettered tiles until you add
-backpack.* and coinbase.* to the same folder. Nothing breaks without them.
-
-TEST
-Verify tab -> Change wallet -> Connect wallet -> Phantom, Solflare and
-Trust show their logos.
+Your logo copy step is unaffected -- if you already ran it, the files are
+in public\wallets\ and will just start showing.

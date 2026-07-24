@@ -37,35 +37,86 @@ type Provider = {
   connect: (opts?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toString(): string } }>;
   signMessage: (msg: Uint8Array, enc?: string) => Promise<{ signature: Uint8Array } | Uint8Array>;
   publicKey?: { toString(): string } | null;
-  isPhantom?: boolean;
 };
 
-export type Detected = { name: string; provider: Provider };
+export type WalletOption = {
+  slug: string;      // also the logo filename: /wallets/<slug>.png
+  name: string;
+  installUrl: string;
+  provider: Provider | null;   // null when it isn't installed
+};
 
-// Most wallets inject themselves, and nearly all of them also answer to
-// window.solana. Listing them by name lets the user pick when several are
-// installed, instead of silently getting whichever won the race.
-export function detectWallets(): Detected[] {
-  if (typeof window === "undefined") return [];
-  const w = window as any;
-  const found: Detected[] = [];
-  const seen = new Set<Provider>();
+// The wallets we offer by name, in the order they're shown. Each knows how
+// to find itself and where to send someone who hasn't got it. Adding one
+// is a single entry here — the picker and the signing flow need no change.
+const REGISTRY: {
+  slug: string;
+  name: string;
+  installUrl: string;
+  find: (w: any) => unknown;
+}[] = [
+  {
+    slug: "phantom",
+    name: "Phantom",
+    installUrl: "https://phantom.app/download",
+    find: (w) => w.phantom?.solana ?? (w.solana?.isPhantom ? w.solana : null),
+  },
+  {
+    slug: "solflare",
+    name: "Solflare",
+    installUrl: "https://solflare.com/download",
+    find: (w) => (w.solflare?.isSolflare ? w.solflare : null) ?? w.solflare,
+  },
+  {
+    slug: "trust",
+    name: "Trust Wallet",
+    installUrl: "https://trustwallet.com/download",
+    find: (w) => w.trustwallet?.solana ?? w.trustWallet?.solana,
+  },
+  {
+    slug: "backpack",
+    name: "Backpack",
+    installUrl: "https://backpack.app/download",
+    find: (w) => w.backpack,
+  },
+  {
+    slug: "coinbase",
+    name: "Coinbase Wallet",
+    installUrl: "https://www.coinbase.com/wallet/downloads",
+    find: (w) => w.coinbaseSolana,
+  },
+];
 
-  const add = (name: string, p: unknown) => {
-    if (!p || typeof (p as Provider).signMessage !== "function") return;
-    if (seen.has(p as Provider)) return;
-    seen.add(p as Provider);
-    found.push({ name, provider: p as Provider });
-  };
+function usable(p: unknown): p is Provider {
+  return !!p && typeof (p as Provider).signMessage === "function";
+}
 
-  add("Phantom", w.phantom?.solana ?? (w.solana?.isPhantom ? w.solana : null));
-  add("Solflare", w.solflare?.isSolflare ? w.solflare : null);
-  add("Backpack", w.backpack);
-  add("Coinbase Wallet", w.coinbaseSolana);
-  // Anything else that injected window.solana.
-  add("Browser wallet", w.solana);
+// Every wallet we know about, each marked with whether it's actually here.
+// Not-installed ones still get listed so the user can go and get one,
+// rather than staring at an empty list wondering what went wrong.
+export function walletOptions(): WalletOption[] {
+  const w = (typeof window === "undefined" ? {} : window) as any;
+  const seen = new Set<unknown>();
 
-  return found;
+  const known = REGISTRY.map(({ slug, name, installUrl, find }) => {
+    const found = find(w);
+    const ok = usable(found) && !seen.has(found);
+    if (ok) seen.add(found);
+    return { slug, name, installUrl, provider: ok ? (found as Provider) : null };
+  });
+
+  // Something injected window.solana that we don't recognise by name.
+  if (usable(w.solana) && !seen.has(w.solana)) {
+    known.push({
+      slug: "generic",
+      name: "Browser wallet",
+      installUrl: "",
+      provider: w.solana as Provider,
+    });
+  }
+
+  // Installed first, so the useful ones are at the top.
+  return known.sort((a, b) => Number(!!b.provider) - Number(!!a.provider));
 }
 
 export function isMobile() {

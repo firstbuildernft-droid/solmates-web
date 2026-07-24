@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { ShieldCheck, Copy, Check, TriangleAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { detectWallets, connectAndSign, isMobile, type Detected } from "@/lib/wallet";
+import { connectAndSign, type WalletOption } from "@/lib/wallet";
+import WalletPicker from "@/components/WalletPicker";
 import { GREEN, GREEN_DK, INK, MUTE, font } from "@/lib/theme";
 
 const DEPOSIT = process.env.NEXT_PUBLIC_DEPOSIT_ADDRESS!;
@@ -14,7 +15,7 @@ type State = "unverified" | "pending" | "verified";
 
 export default function VerifyContent() {
   const [state, setState] = useState<State>("unverified");
-  const [wallets, setWallets] = useState<Detected[]>([]);
+  const [picking, setPicking] = useState(false);
   const [signing, setSigning] = useState(false);
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
@@ -42,17 +43,13 @@ export default function VerifyContent() {
     })();
   }, []);
 
-  useEffect(() => {
-    setWallets(detectWallets());
-  }, []);
-
   // Connect a wallet and prove ownership by signing a message. No payment,
   // no transaction, and the private key never leaves the wallet.
-  async function signVerify(w: Detected) {
+  async function signVerify(w: WalletOption) {
     setSigning(true);
     setNote(null);
     try {
-      const { address: addr, signature } = await connectAndSign(w.provider, async (a) => {
+      const { address: addr, signature } = await connectAndSign(w.provider!, async (a) => {
         const res = await fetch("/api/wallet/connect", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -73,6 +70,7 @@ export default function VerifyContent() {
 
       setAddress(addr);
       setState("verified");
+      setPicking(false);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Something went wrong.";
       // Wallets throw this when the user closes the prompt; not an error
@@ -188,38 +186,26 @@ export default function VerifyContent() {
               message to prove it's yours. Nothing is sent and no funds move.
             </p>
 
-            {wallets.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-                {wallets.map((w) => (
-                  <button
-                    key={w.name}
-                    onClick={() => signVerify(w)}
-                    disabled={signing}
-                    style={{
-                      width: "100%",
-                      background: GREEN,
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: 999,
-                      padding: 14,
-                      fontWeight: 800,
-                      fontSize: 15,
-                      fontFamily: font,
-                      cursor: signing ? "default" : "pointer",
-                      opacity: signing ? 0.6 : 1,
-                    }}
-                  >
-                    {signing ? "Waiting for your wallet…" : `Connect ${w.name}`}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div style={{ background: "rgba(11,31,18,.03)", borderRadius: 12, padding: "13px 15px", marginBottom: 20, fontSize: 13, color: MUTE, lineHeight: 1.5 }}>
-                {isMobile()
-                  ? "No wallet detected. Open thesolmates.com inside your wallet app's browser (Phantom, Solflare) and this will work — or use the manual option below."
-                  : "No wallet extension detected. Install Phantom or Solflare, or use the manual option below."}
-              </div>
-            )}
+            <button
+              onClick={() => setPicking(true)}
+              disabled={signing}
+              style={{
+                width: "100%",
+                background: GREEN,
+                color: "#fff",
+                border: "none",
+                borderRadius: 999,
+                padding: 14,
+                fontWeight: 800,
+                fontSize: 15,
+                fontFamily: font,
+                cursor: signing ? "default" : "pointer",
+                opacity: signing ? 0.6 : 1,
+                marginBottom: 20,
+              }}
+            >
+              {signing ? "Waiting for your wallet…" : "Connect wallet"}
+            </button>
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 0 16px" }}>
               <span style={{ flex: 1, height: 1, background: "rgba(11,31,18,.1)" }} />
@@ -366,6 +352,14 @@ export default function VerifyContent() {
           </>
         )}
       </div>
+
+      {picking && (
+        <WalletPicker
+          busy={signing}
+          onPick={(w) => signVerify(w)}
+          onClose={() => setPicking(false)}
+        />
+      )}
     </main>
   );
 }
