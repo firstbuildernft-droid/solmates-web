@@ -1,23 +1,19 @@
-MOVE PROFILE AND VERIFY HEADERS UP
-==================================
+BOTTOM BAR -- WHITE AT 35%
+==========================
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\toptext\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\navwhite\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "headers to the top"
+   git commit -m "bottom bar white 35%"
    git push
 
-FILES
-  components/tabs_VerifyContent.tsx
-  components/tabs_ProfileContent.tsx
+FILE
+  components/TabShell.tsx   <- REPLACES
 
-Top padding on both is now 4px, down from 32px. "My profile" and "Verify
-your wallet" sit right at the top with almost nothing above them.
+The bar is white at 35% opacity, no border, no blur. The green shows
+through it so it still blends, but the bar has some presence again.
 
-This supersedes the earlier 14px change, so it doesn't matter whether that
-one ever got pushed.
-
-TOO TIGHT?
-It's `padding: "4px 20px 60px"` near the top of each file's return. 8 or
-10 gives it a little air back.
+TO ADJUST
+In TabShell.tsx: background: "rgba(255,255,255,.35)"
+Raise .35 toward .6 for more solid, lower toward .2 for fainter.

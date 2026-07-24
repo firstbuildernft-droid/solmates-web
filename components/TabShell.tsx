@@ -82,7 +82,7 @@ export default function TabShell({ active }: { active: Tab }) {
       <nav
         style={{
           position: "fixed", bottom: 0, left: 0, right: 0, display: "flex",
-          background: "transparent", borderTop: "none",
+          background: "rgba(255,255,255,.35)", borderTop: "none",
           maxWidth: 430, margin: "0 auto", zIndex: 30,
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
