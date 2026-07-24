@@ -1,38 +1,32 @@
-GREEN TEXTURED BACKGROUND
-=========================
-No migration.
+FIX: green background wasn't showing
+====================================
+One file. The four component files from last time are already correct --
+don't re-copy them.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\greenbg\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\greenbg2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "green textured background"
+   git commit -m "fix green background"
    git push
 
-FILES
-  app/globals.css                     <- REPLACES (the backdrop)
-  components/tabs_DiscoverContent.tsx <- REPLACES )
-  components/tabs_MatchesContent.tsx  <- REPLACES ) these four just drop
-  components/tabs_ProfileContent.tsx  <- REPLACES ) their white background
-  components/tabs_VerifyContent.tsx   <- REPLACES ) so it shows through
+FILE
+  app/globals.css   <- REPLACES
 
-WHAT IT LOOKS LIKE
-A soft green wash pooling at the top-left and bottom-right, fading to
-white through the middle, with a fine grain over it. Cards, the nav bar
-and the slide-in panels stay solid white, so they read as surfaces
-sitting on the tint rather than everything going green.
+WHY IT WAS INVISIBLE
+The backdrop was on body::before with z-index -1, which puts it behind
+body's own background -- and body was set to solid white. So it was
+rendering the whole time, just underneath an opaque sheet. It's now on
+html itself, which paints across the full canvas and can't be covered.
 
-The grain is a generated SVG, not an image file, so there's nothing extra
-to download and it stays sharp on any screen.
+I also nudged the green up slightly (0.18 / 0.14 / 0.08) since the first
+pass was pitched conservatively and you never got to see it.
 
-TUNING IT YOURSELF
-All of it is one block at the bottom of app/globals.css, in body::before.
+Hard-refresh with Ctrl+Shift+R after it deploys -- CSS caches.
 
-  Too green?      lower 0.16 / 0.12 / 0.07 in the gradients
-  Not green enough? raise them (0.24 / 0.18 / 0.11 is clearly visible)
-  Too grainy?     lower opacity='0.16' in the SVG
-  Grain too fine? lower baseFrequency='0.8' to about 0.5
-  Hate it?        delete the whole body::before block; the four component
-                  files can stay, they'll just show white again
-
-Tell me which direction and I'll adjust it.
+TUNING
+Bottom of app/globals.css, the html { } block:
+  too green      -> lower 0.18 / 0.14 / 0.08
+  not enough     -> raise toward 0.26 / 0.20 / 0.12
+  too grainy     -> lower opacity='0.16'
+  grain too fine -> baseFrequency 0.8 -> 0.5
