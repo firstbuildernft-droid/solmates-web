@@ -133,7 +133,7 @@ export default function ProfileContent() {
     <main
       style={{
         minHeight: "100vh",
-        padding: "32px 20px 60px",
+        padding: "4px 20px 60px",
         fontFamily: font,
         background: "transparent",
         display: "flex",

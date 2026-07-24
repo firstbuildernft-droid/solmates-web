@@ -1,23 +1,23 @@
-GREEN BACKGROUND -- back to crisp
-=================================
+MOVE PROFILE AND VERIFY HEADERS UP
+==================================
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\greenbg4\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\toptext\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "crisp green background"
+   git commit -m "headers to the top"
    git push
 
-FILE
-  app/globals.css   <- REPLACES
+FILES
+  components/tabs_VerifyContent.tsx
+  components/tabs_ProfileContent.tsx
 
-The soft fade I'd put on the left and right edges is gone -- that was the
-blurry look. The green is back to how it was when you first saw it, still
-inside the app column, with clean edges.
+Top padding on both is now 4px, down from 32px. "My profile" and "Verify
+your wallet" sit right at the top with almost nothing above them.
 
-Hard-refresh (Ctrl+Shift+R) after deploy.
+This supersedes the earlier 14px change, so it doesn't matter whether that
+one ever got pushed.
 
-STILL LOOKS SOFT?
-Then it's the grain, not the edges. In the url(...) line change
-opacity='0.16' to '0' and the texture disappears while the green stays.
-Tell me and I'll do it.
+TOO TIGHT?
+It's `padding: "4px 20px 60px"` near the top of each file's return. 8 or
+10 gives it a little air back.
