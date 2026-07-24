@@ -1,32 +1,30 @@
-FIX: green background wasn't showing
-====================================
-One file. The four component files from last time are already correct --
-don't re-copy them.
+GREEN BACKGROUND -- app column only
+===================================
+One file.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\greenbg2\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\greenbg3\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "fix green background"
+   git commit -m "green background inside app column"
    git push
 
 FILE
   app/globals.css   <- REPLACES
 
-WHY IT WAS INVISIBLE
-The backdrop was on body::before with z-index -1, which puts it behind
-body's own background -- and body was set to solid white. So it was
-rendering the whole time, just underneath an opaque sheet. It's now on
-html itself, which paints across the full canvas and can't be covered.
+WHAT CHANGED
+The tint is now a fixed 430px-wide strip down the middle -- the same width
+your screens use -- instead of covering the whole page. On a desktop
+browser the app reads as a phone sitting on a plain white surface. On an
+actual phone it fills the screen, so nothing looks different there.
 
-I also nudged the green up slightly (0.18 / 0.14 / 0.08) since the first
-pass was pitched conservatively and you never got to see it.
+Hard-refresh (Ctrl+Shift+R) after deploy.
 
-Hard-refresh with Ctrl+Shift+R after it deploys -- CSS caches.
+TUNING -- bottom of app/globals.css, body::before
+  column width  -> max-width: 430px
+  too green     -> lower 0.18 / 0.14 / 0.08
+  not enough    -> raise toward 0.26 / 0.20 / 0.12
+  too grainy    -> lower opacity='0.16'
 
-TUNING
-Bottom of app/globals.css, the html { } block:
-  too green      -> lower 0.18 / 0.14 / 0.08
-  not enough     -> raise toward 0.26 / 0.20 / 0.12
-  too grainy     -> lower opacity='0.16'
-  grain too fine -> baseFrequency 0.8 -> 0.5
+If you want the app column edge visible on desktop -- a hairline border or
+a soft shadow down each side -- say so, it's two lines.

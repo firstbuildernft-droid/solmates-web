@@ -175,16 +175,37 @@ html {
   display: none;
 }
 
-/* Tinted, grained backdrop.
+/* Tinted, grained backdrop, confined to the app column.
 
-   On html rather than body: an element's background paints over its own
-   ::before, so the earlier version was invisible under body's white. The
-   html background also covers the full canvas, so it can't run out
-   underneath a short page.
+   The tint used to cover the whole canvas, which on a wide screen looked
+   like the page was green rather than the app. Now it's a fixed strip the
+   same 430px width the screens use, centred — so the app reads as a phone
+   sitting on a plain surface.
+
+   This works as a ::before because body is transparent; when body had its
+   own white background it painted straight over this and nothing showed.
 
    The grain is an inline SVG turbulence filter — no image file to
    download, and it stays sharp at any pixel density. */
 html {
+  background: #fff;
+}
+
+body {
+  background: transparent;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  z-index: -1;
+  pointer-events: none;
   background-color: #fff;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E"),
@@ -193,9 +214,4 @@ html {
     linear-gradient(178deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.02) 46%, rgba(255, 255, 255, 0) 100%);
   background-size: 150px 150px, cover, cover, cover;
   background-repeat: repeat, no-repeat, no-repeat, no-repeat;
-  background-attachment: fixed;
-}
-
-body {
-  background: transparent;
 }
