@@ -1,16 +1,18 @@
-REVERT: solid nav bar again
-===========================
-The blur is gone. Bottom bar is plain white as it was.
+BOTTOM TABS BLEND IN
+====================
+No white bar, no border, no blur. The tabs now sit directly on the
+background, so there's no edge where the bar starts.
 
-   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\navrevert\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
+   Copy-Item "C:\Users\onur1\OneDrive\Masaüstü\navblend\*" "C:\Users\onur1\Documents\solmates-web" -Recurse -Force
    Remove-Item "C:\Users\onur1\Documents\solmates-web\_HOW_TO.txt" -ErrorAction SilentlyContinue
    cd C:\Users\onur1\Documents\solmates-web
    git add .
-   git commit -m "revert frosted nav"
+   git commit -m "blend bottom tabs"
    git push
 
 FILE
   components/TabShell.tsx   <- REPLACES
 
-Everything else stays: the tint, the feathered column edges, the header
-spacing. Only the bottom bar changed back.
+IF YOU ALSO WANT THE TINT GONE
+Open app/globals.css and delete the whole body::before block at the
+bottom. That returns the app to plain white with the tabs still blending.
