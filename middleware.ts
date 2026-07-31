@@ -40,7 +40,14 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublic = path.startsWith("/login") || path.startsWith("/auth");
+  // /api/mobile/* is for the native app, which has no cookie jar — it sends a
+  // Supabase access token as a Bearer header instead. Each of those routes
+  // verifies that token itself and 401s without it, so they must skip this
+  // cookie check; otherwise they get bounced to /login and the app just hangs.
+  const isPublic =
+    path.startsWith("/login") ||
+    path.startsWith("/auth") ||
+    path.startsWith("/api/mobile");
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
